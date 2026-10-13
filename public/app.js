@@ -307,6 +307,7 @@ function renderResult(r, d) {
   if (diag.pass) {
     $('#planSummary').innerHTML = `<span class="note">이 던전의 입장 조건을 이미 모두 넘어서 채울 부족분이 없어요. 위 목록에서 빨간 표시(스탯 부족)가 있는 던전을 고르면 성장 순서가 나옵니다.</span>`;
     $('#planTable').innerHTML = '';
+    $('#shopping').innerHTML = '';
   } else {
     const solved = r.unresolved.length === 0;
     $('#planSummary').innerHTML = `
@@ -314,7 +315,7 @@ function renderResult(r, d) {
       <span class="note">${solved ? '이대로 하면 모든 부족분이 채워집니다.' : '계산 가능한 방법만으로는 일부가 남습니다 (아래 참고).'} 강화 비용은 연속 실패 보너스까지 반영한 기대값입니다.</span>
       ${r.unpricedInPlan?.length ? `<p class="warn" style="flex-basis:100%">거래소 시세를 못 찾은 재료 ${r.unpricedInPlan.length}종(${esc(r.unpricedInPlan.slice(0, 6).join(', '))}${r.unpricedInPlan.length > 6 ? ' 등' : ''})은 비용에서 빠져 있어서, 실제 비용은 이보다 큽니다. 아래 "재료 시세"에서 가격을 넣으면 정확해져요.</p>` : ''}`;
     $('#planTable').innerHTML = `<thead><tr><th class="num">순서</th><th>방법</th><th>오르는 스탯</th><th class="num">비용</th><th class="num">부족분 1%당</th></tr></thead>
-      <tbody>${r.plan.map((p, i) => planRow(p, i)).join('') || `<tr><td colspan="5" class="muted">계산할 수 있는 방법이 없습니다. 장비 진행 상황과 재료 시세를 확인해 주세요.</td></tr>`}</tbody>`;
+      <tbody>${r.plan.map((p, i) => planRow(p, i)).join('') || `<tr><td colspan="5" class="muted">계산할 수 있는 방법이 없습니다. 장비 진행 상황과 재료 시세를 확인해 주세요.</td></tr>`}</tbody>`;    renderShopping(r.plan);
   }
 
   $('#unresolved').innerHTML = r.unresolved.length ? `<div class="box bad"><h4>아직 남는 부족분</h4><ul>${r.unresolved.map((u) =>
@@ -346,6 +347,23 @@ function renderResult(r, d) {
       <td class="num"><span class="gold">${fmtGold(x.costPerPoint)}</span>${x.partial ? `<div class="muted">+ 시세 없는 재료 ${x.missing.length}종</div>` : ''}</td>
     </tr>`).join('') || '<tr><td colspan="4" class="muted">이 스탯을 올릴 수 있는 방법이 남아 있지 않습니다.</td></tr>'}</tbody>` : '';
   $('#perStatTabs').hidden = !keys.length;
+}
+
+// 계획 전체에 필요한 재료 합계 (시세와 관계없이 '무엇을 몇 개 모아야 하는지')
+function renderShopping(plan) {
+  if (!plan.length) { $('#shopping').innerHTML = ''; return; }
+  let gold = 0;
+  const mats = {};
+  for (const p of plan) {
+    gold += p.goldDirect || 0;
+    for (const [n, m] of Object.entries(p.materials)) mats[n] = (mats[n] || 0) + m.qty;
+  }
+  const rows = Object.entries(mats).sort((a, b) => b[1] - a[1]);
+  const q = (v) => (v % 1 ? `약 ${Math.ceil(v).toLocaleString('ko-KR')}` : v.toLocaleString('ko-KR'));
+  $('#shopping').innerHTML = `<div class="box shopping"><h4>이 순서대로 하려면 모아야 할 것</h4>
+    <p class="hint" style="margin-top:0">강화처럼 확률이 있는 단계는 기대 시도 횟수만큼 곱한 값이라, 운에 따라 더 적게 들 수도 있어요.</p>
+    <ul class="shop-list"><li><span>골드 (연마·강화·승급 비용)</span><b class="gold">${fmtGold(gold)}</b></li>
+    ${rows.map(([n, v]) => `<li><span>${esc(n)}</span><b>${q(v)}개</b></li>`).join('')}</ul></div>`;
 }
 
 function planRow(p, i) {
