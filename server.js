@@ -68,6 +68,10 @@ app.get('/api/debug/auction', handle(async (req, res) => {
   res.json(await nexon.getAuctionRaw(item));
 }));
 
+app.get('/api/debug/auction-probe', handle(async (req, res) => {
+  res.json(await nexon.probeAuction(String(req.query.item || '고급 강화의 비약')));
+}));
+
 app.get('/api/prices', handle(async (req, res) => {
   const prices = await nexon.getPrices(allItems);
   const vals = Object.values(prices);
