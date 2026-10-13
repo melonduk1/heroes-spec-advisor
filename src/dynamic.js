@@ -84,6 +84,7 @@ const ENCHANTS = {
   suffix: {
     '강림': { atk: 450, crit: 2, bal: 2 },
     '운명': { atk: 400, crit: 4, bal: 4 },
+    '신비': { atk: 200, crit: 2, bal: 2 }, // 반지·벨트 접미 5랭크
     '고독': { atk: 465, def: -300, bal: 10 },
     '시련': { def: 120, crit: 12, bal: -1 },
   },
