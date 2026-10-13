@@ -218,6 +218,15 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
     perStat,
     blocked,
     unpricedInPlan,
+    // 계산 후보가 왜 없는지 설명용: 꺼진 방법 / 이미 끝까지 한 방법
+    availability: (() => {
+      const offList = []; const maxed = [];
+      for (const a of catalog) {
+        if (off.has(a.id)) offList.push(a.name);
+        else if (!nextStep(a, Math.max(0, Number(progress[a.id]) || 0), o)) maxed.push(a.name);
+      }
+      return { total: catalog.length, off: offList, maxed };
+    })(),
     assumptions: {
       luckyMultiplier: o.luckyMultiplier,
     },

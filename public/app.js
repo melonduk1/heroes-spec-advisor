@@ -98,10 +98,15 @@ $('#lookupForm').addEventListener('submit', async (e) => {
 function applyEquipment(eq) {
   const box = $('#equipSummary');
   if (!eq) {
+    // 이전 캐릭터의 진행 상황이 남아 계산을 막지 않도록 비운다
+    S.progress = {};
+    store.set('hs.progress', S.progress);
+    renderGear();
     box.innerHTML = '<p class="hint">장비 정보를 불러오지 못해 장비 진행 상황은 직접 입력해야 해요.</p>';
     return;
   }
-  S.progress = { ...S.progress, ...eq.progress };
+  // 새 캐릭터를 불러오면 진행 상황을 그 캐릭터 장비 기준으로 통째로 바꾼다
+  S.progress = { ...eq.progress };
   store.set('hs.progress', S.progress);
   const off = new Set(S.disabled);
   for (const [id, on] of Object.entries(eq.enable)) { if (on) off.delete(id); else off.add(id); }
@@ -320,7 +325,7 @@ function renderResult(r, d) {
 
   $('#unresolved').innerHTML = r.unresolved.length ? `<div class="box bad"><h4>아직 남는 부족분</h4><ul>${r.unresolved.map((u) =>
     `<li>${esc(S.meta.statLabels[u.stat])} ${fmt(u.gap)}</li>`).join('')}</ul>
-    <p class="hint">켜 둔 방법을 모두 최대로 해도 모자랍니다. 시세가 없어 빠진 방법(아래)에 가격을 넣거나, 정령석·아바타·버프 등 이 계산에 없는 수단을 고려하세요.</p></div>` : '';
+    ${availNote(r)}</div>` : '';
 
   // 시세가 없어 빠진 후보
   if (r.blocked.length) {
@@ -364,6 +369,21 @@ function renderShopping(plan) {
     <p class="hint" style="margin-top:0">강화처럼 확률이 있는 단계는 기대 시도 횟수만큼 곱한 값이라, 운에 따라 더 적게 들 수도 있어요.</p>
     <ul class="shop-list"><li><span>골드 (연마·강화·승급 비용)</span><b class="gold">${fmtGold(gold)}</b></li>
     ${rows.map(([n, v]) => `<li><span>${esc(n)}</span><b>${q(v)}개</b></li>`).join('')}</ul></div>`;
+}
+
+// 남는 부족분이 왜 생겼는지 설명
+function availNote(r) {
+  const a = r.availability;
+  if (!a) return '';
+  const usable = a.total - a.off.length - a.maxed.length;
+  const parts = [];
+  if (a.maxed.length) parts.push(`이미 끝까지 한 방법 ${a.maxed.length}개`);
+  if (a.off.length) parts.push(`계산에서 꺼진 방법 ${a.off.length}개 (착용하지 않은 장비, 기본으로 꺼 둔 인챈트 등)`);
+  const why = `이 계산기가 아는 방법 ${a.total}개 중 ${parts.join(', ')}이고, 남은 방법은 ${usable}개예요.`;
+  const advice = usable === 0
+    ? '지금 장비로는 이 계산기에 들어 있는 성장 방법(에리우 장비 연마·승급, 에리우 장신구 강화, 인챈트)을 더 할 수 없어요. 에리우가 아닌 장비(와드네·오르나 등)를 쓰고 있다면 그 장비의 성장 경로는 아직 계산에 없습니다. 왼쪽 "장비 진행 상황"에서 꺼진 항목을 켜면 그 장비로 바꿨을 때를 가정해 계산해요.'
+    : '남은 방법을 모두 해도 모자라요. 왼쪽 "장비 진행 상황"에서 꺼진 항목을 켜거나, 정령석·아바타·버프처럼 이 계산에 없는 수단을 고려해 주세요.';
+  return `<p class="hint">${why}</p><p class="hint">${advice}</p>`;
 }
 
 function planRow(p, i) {
