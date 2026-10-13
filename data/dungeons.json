@@ -219,7 +219,14 @@
         "출시 당시 '대항력 315' 조건 → 현재 '방어력 관통 315'"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1170",
-      "caps": null
+      "caps": {
+        "atk": 70620,
+        "crit": 331,
+        "bal": 172,
+        "critResist": 346,
+        "source": "https://www.mhon.kr/raid",
+        "checked": "2026-10-13"
+      }
     },
     {
       "id": "knights-battle",
