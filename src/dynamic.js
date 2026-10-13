@@ -70,6 +70,7 @@ const ENCHANTS = {
     '물드는': { atk: 145, def: 300, crit: 6, bal: 7 },
     '공허한': { def: 1000, crit: 4 },
     '헤매는': { bal: 12 },
+    '대적자의': { bal: 9 }, // 반지 접두 4랭크 (크리티컬 저항 5, 생명력 -450은 계산 제외)
     '메마른': { crit: 6, bal: 4 },
     '초월의': { atk: 600, crit: 2, bal: 2, addDmg: 150 },
     '처단하는': { atk: 700, crit: 2, bal: 2, addDmg: 50 },
