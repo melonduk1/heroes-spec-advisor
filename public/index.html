@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>마영전 스펙 진단기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <h1>마영전 스펙 진단기</h1>
+      <p class="lede">가고 싶은 던전까지 무엇이 얼마나 모자란지, 그리고 가장 적은 골드로 채우는 순서를 계산합니다.</p>
+      <p id="mockBanner" class="banner" hidden>목업 모드로 실행 중입니다. 캐릭터 스탯과 거래소 가격은 예시 값이에요. <code>.env</code>에 <code>NEXON_API_KEY</code>를 넣으면 실제 데이터로 바뀝니다.</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="side">
+      <section class="panel" aria-labelledby="h-char">
+        <h2 id="h-char">내 캐릭터</h2>
+        <form id="lookupForm" class="lookup">
+          <label for="charName" class="sr">캐릭터 이름</label>
+          <input id="charName" name="name" placeholder="캐릭터 이름" autocomplete="off" required>
+          <button type="submit">불러오기</button>
+        </form>
+        <p id="lookupMsg" class="msg" role="status"></p>
+        <div id="equipSummary"></div>
+
+        <div id="statForm" class="stat-form"></div>
+        <p class="hint">불러온 값은 직접 고칠 수 있어요. 시공간 왜곡은 버프를 뺀 순수 능력치로 판정하니 그때는 순수 값을 넣어 주세요.</p>
+      </section>
+
+      <details class="panel gear-panel" id="gearPanel" open>
+        <summary><h2 id="h-gear">장비 진행 상황</h2></summary>
+        <p class="hint">이미 한 연마 횟수, 현재 강화·승급 단계를 넣어야 남은 비용이 정확해집니다. 안 쓰는 장비는 체크를 풀어 주세요.</p>
+        <div class="row-opt">
+          <label for="lucky">연마 행운 성공 기대 배율</label>
+          <input id="lucky" type="number" min="1" max="3" step="0.05" value="1">
+        </div>
+        <p class="hint small">패치노트에 행운 성공 확률이 공개되지 않아 기본값은 1배(보수적)입니다.</p>
+        <div id="gearList" class="gear"></div>
+      </details>
+    </aside>
+
+    <div class="main">
+      <section aria-labelledby="h-ladder">
+        <div class="sec-head">
+          <h2 id="h-ladder">던전 입장 조건</h2>
+          <p class="sub" id="ladderSub">입장 조건이 낮은 순서입니다. 던전을 고르면 아래에 부족한 스탯과 추천 경로가 나옵니다.</p>
+        </div>
+        <ol id="ladder" class="ladder"></ol>
+      </section>
+
+      <section id="result" class="result" hidden aria-live="polite">
+        <div class="sec-head">
+          <h2 id="resultTitle">부족한 스탯</h2>
+          <p class="sub" id="resultSub"></p>
+        </div>
+        <div id="warnings"></div>
+        <div id="gaps" class="gaps"></div>
+
+        <div class="sec-head">
+          <h3>가장 싸게 채우는 순서</h3>
+          <p class="sub">매번 "부족분 1%를 메우는 데 드는 골드"가 가장 적은 다음 단계를 고른 결과입니다.</p>
+        </div>
+        <div id="planSummary" class="plan-summary"></div>
+        <div class="table-wrap"><table id="planTable" class="plan"></table></div>
+        <div id="unresolved"></div>
+        <div id="blocked"></div>
+
+        <div class="sec-head">
+          <h3>스탯별 가성비 순위</h3>
+          <p class="sub">지금 상태에서 다음 한 단계를 했을 때, 해당 스탯 1포인트에 드는 골드입니다.</p>
+        </div>
+        <div id="perStatTabs" class="tabs" role="tablist"></div>
+        <div class="table-wrap"><table id="perStatTable" class="plan"></table></div>
+      </section>
+
+      <section aria-labelledby="h-prices" class="prices-sec">
+        <details id="pricesBox">
+          <summary><h2 id="h-prices">재료 시세</h2><span class="sub">거래소 중앙값, 직접 입력하면 그 값을 우선 사용</span></summary>
+          <p class="hint">정수처럼 귀속이라 거래소에 없는 재료는 비워 두면 계산에서 빠지고 "시세 확인 필요"로 따로 표시됩니다. 이미 갖고 있는 재료는 0을 넣으세요.</p>
+          <div id="priceList" class="price-list"></div>
+        </details>
+      </section>
+
+      <footer class="foot">
+        <p>입장 조건과 성장 수치는 마비노기 영웅전 공식 패치노트 기준이며 <span id="dataDate"></span>에 정리했습니다. 각 항목의 출처 링크를 눌러 확인할 수 있어요. 비용은 기대값이라 실제로는 운에 따라 달라집니다.</p>
+      </footer>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

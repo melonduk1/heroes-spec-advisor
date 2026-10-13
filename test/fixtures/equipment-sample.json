@@ -1,0 +1,478 @@
+{
+ "item_equipment": [
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Right Hand",
+   "item_name": "레어 에리우 소울블레이드",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [
+     {
+      "stat_name": "공격력",
+      "stat_value": "2000"
+     },
+     {
+      "stat_name": "공격력 제한 해제",
+      "stat_value": "9000"
+     },
+     {
+      "stat_name": "밸런스",
+      "stat_value": "4"
+     },
+     {
+      "stat_name": "크리티컬",
+      "stat_value": "4"
+     }
+    ],
+    "ability_name": "치명적인 무기 LV5 (시즌4)",
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "비극의",
+    "suffix_enchant_preset_1": "일격",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": {
+     "stat_name": "크리티컬",
+     "stat_value": "2"
+    },
+    "power_infusion_preset_2": {
+     "stat_name": "크리티컬",
+     "stat_value": "2"
+    }
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Left Hand",
+   "item_name": "에리우의 서",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "공허한",
+    "suffix_enchant_preset_1": "찬미",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": {
+     "stat_name": "크리티컬",
+     "stat_value": "2"
+    },
+    "power_infusion_preset_2": {
+     "stat_name": "최대 생명력",
+     "stat_value": "20"
+    }
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Head",
+   "item_name": "전설 에리우 헬름",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [
+     {
+      "stat_name": "공격력 제한 해제",
+      "stat_value": "1165"
+     },
+     {
+      "stat_name": "방어력",
+      "stat_value": "479"
+     },
+     {
+      "stat_name": "크리티컬 저항",
+      "stat_value": "3"
+     }
+    ],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "가득한",
+    "suffix_enchant_preset_1": "투혼",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": {
+     "stat_name": "방어력",
+     "stat_value": "102"
+    },
+    "power_infusion_preset_2": {
+     "stat_name": "지능",
+     "stat_value": "-3"
+    }
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Upper",
+   "item_name": "전설 에리우 메일",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [
+     {
+      "stat_name": "공격력 제한 해제",
+      "stat_value": "1050"
+     },
+     {
+      "stat_name": "방어력",
+      "stat_value": "596"
+     },
+     {
+      "stat_name": "크리티컬 저항",
+      "stat_value": "5"
+     }
+    ],
+    "ability_name": "순간 보호 LV5 (시즌4)",
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "영원한",
+    "suffix_enchant_preset_1": "시련",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": {
+     "stat_name": "방어력",
+     "stat_value": "103"
+    },
+    "power_infusion_preset_2": null
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Lower",
+   "item_name": "전설 에리우 그리브즈",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [
+     {
+      "stat_name": "공격력 제한 해제",
+      "stat_value": "1050"
+     },
+     {
+      "stat_name": "방어력",
+      "stat_value": "567"
+     },
+     {
+      "stat_name": "크리티컬 저항",
+      "stat_value": "6"
+     }
+    ],
+    "ability_name": "축복받은 마법 가루 씨앗 LV2 (시즌4)",
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "가득한",
+    "suffix_enchant_preset_1": "투혼",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": {
+     "stat_name": "방어력",
+     "stat_value": "103"
+    },
+    "power_infusion_preset_2": null
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Hand",
+   "item_name": "전설 에리우 건틀릿",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [
+     {
+      "stat_name": "공격력 제한 해제",
+      "stat_value": "700"
+     },
+     {
+      "stat_name": "방어력",
+      "stat_value": "479"
+     },
+     {
+      "stat_name": "크리티컬 저항",
+      "stat_value": "3"
+     }
+    ],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "물드는",
+    "suffix_enchant_preset_1": "고독",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": {
+     "stat_name": "방어력",
+     "stat_value": "103"
+    },
+    "power_infusion_preset_2": null
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Leg",
+   "item_name": "전설 와드네 부츠",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [
+     {
+      "stat_name": "공격력 제한 해제",
+      "stat_value": "700"
+     },
+     {
+      "stat_name": "방어력",
+      "stat_value": "479"
+     },
+     {
+      "stat_name": "크리티컬 저항",
+      "stat_value": "3"
+     }
+    ],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "물드는",
+    "suffix_enchant_preset_1": "고독",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": {
+     "stat_name": "방어력",
+     "stat_value": "103"
+    },
+    "power_infusion_preset_2": {
+     "stat_name": "크리티컬 저항",
+     "stat_value": "-1"
+    }
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Rhod",
+   "item_name": "몰락자의 완전한 로드",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "단호한",
+    "suffix_enchant_preset_1": "격돌",
+    "prefix_enchant_preset_2": "집중의",
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": null,
+    "power_infusion_preset_2": null
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Right Finger",
+   "item_name": "필멸의 굴레",
+   "item_option": {
+    "enhancement_level": 20,
+    "tuning_stat": [],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "헤매는",
+    "suffix_enchant_preset_1": "신비",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": {
+     "stat_name": "밸런스",
+     "stat_value": "2"
+    },
+    "power_infusion_preset_2": {
+     "stat_name": "힘",
+     "stat_value": "-3"
+    }
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Left Finger",
+   "item_name": "고요의 증표",
+   "item_option": {
+    "enhancement_level": 20,
+    "tuning_stat": [],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "대적자의",
+    "suffix_enchant_preset_1": "격노",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": {
+     "stat_name": "크리티컬",
+     "stat_value": "2"
+    },
+    "power_infusion_preset_2": {
+     "stat_name": "최대 스태미나",
+     "stat_value": "-1"
+    }
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Earring",
+   "item_name": "풍요의 근본",
+   "item_option": {
+    "enhancement_level": 20,
+    "tuning_stat": [],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "감춰진",
+    "suffix_enchant_preset_1": "사념",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": {
+     "stat_name": "크리티컬",
+     "stat_value": "2"
+    },
+    "power_infusion_preset_2": {
+     "stat_name": "밸런스",
+     "stat_value": "2"
+    }
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Belt",
+   "item_name": "스타라이트 벨트",
+   "item_option": {
+    "enhancement_level": 20,
+    "tuning_stat": [],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "메마른",
+    "suffix_enchant_preset_1": "운명",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 2,
+    "power_infusion_preset_1": {
+     "stat_name": "크리티컬",
+     "stat_value": "2"
+    },
+    "power_infusion_preset_2": {
+     "stat_name": "밸런스",
+     "stat_value": "2"
+    }
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Charm",
+   "item_name": "잿빛 황혼 브로치",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "초월의",
+    "suffix_enchant_preset_1": "사념",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 2,
+    "power_infusion_preset_1": {
+     "stat_name": "최대 스태미나",
+     "stat_value": "2"
+    },
+    "power_infusion_preset_2": {
+     "stat_name": "크리티컬",
+     "stat_value": "2"
+    }
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Artifact",
+   "item_name": "주시자의 완전한 웨어울프의 앞발",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 2,
+    "prefix_enchant_preset_1": "처단하는",
+    "suffix_enchant_preset_1": "사념",
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": "강림",
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": null,
+    "power_infusion_preset_2": null
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Right Wrist",
+   "item_name": "군주의 완전한 흑요석 팔찌",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": null,
+    "suffix_enchant_preset_1": null,
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": null,
+    "power_infusion_preset_2": null
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Left Wrist",
+   "item_name": "군주의 녹슨 흑요석 팔찌",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": null,
+    "suffix_enchant_preset_1": null,
+    "prefix_enchant_preset_2": null,
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 1,
+    "power_infusion_preset_1": null,
+    "power_infusion_preset_2": null
+   }
+  },
+  {
+   "item_equipment_page": "Bag",
+   "item_equipment_slot_name": "Necklace",
+   "item_name": "칠흑빛 고양이 목걸이",
+   "item_option": {
+    "enhancement_level": null,
+    "tuning_stat": [],
+    "ability_name": null,
+    "prefix_enchant_use_preset_no": 1,
+    "suffix_enchant_use_preset_no": 1,
+    "prefix_enchant_preset_1": "질풍의",
+    "suffix_enchant_preset_1": "물결",
+    "prefix_enchant_preset_2": "감춰진",
+    "suffix_enchant_preset_2": null,
+    "power_infusion_use_preset_no": 2,
+    "power_infusion_preset_1": {
+     "stat_name": "밸런스",
+     "stat_value": "2"
+    },
+    "power_infusion_preset_2": {
+     "stat_name": "크리티컬",
+     "stat_value": "2"
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "heroes-spec-advisor",
+  "version": "1.0.0",
+  "description": "마비노기 영웅전: 던전 입장 스펙 진단 + 가성비 성장 경로 추천",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "mock": "MOCK=1 node server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.22.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
