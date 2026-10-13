@@ -139,7 +139,14 @@
         "하루 1회 성공 제한, 피로도 16%"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1181",
-      "caps": null
+      "caps": {
+        "atk": 71120,
+        "crit": 336,
+        "bal": 177,
+        "critResist": 367,
+        "source": "https://www.mhon.kr/raid",
+        "checked": "2026-10-13"
+      }
     },
     {
       "id": "special-dungeon",
