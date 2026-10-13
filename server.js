@@ -36,7 +36,13 @@ app.get('/api/meta', (req, res) => {
   });
 });
 
-app.get('/api/dungeons', (req, res) => res.json(dungeonsData.dungeons));
+// 만크리 = 던전 크리티컬 요구치 + 50, 만밸런스 = 밸런스 요구치 + 100
+const CAP_BONUS = { crit: 50, bal: 100 };
+const capStatsOf = (d) => Object.fromEntries(Object.entries(CAP_BONUS)
+  .filter(([k]) => d.minStats[k] !== undefined).map(([k, b]) => [k, d.minStats[k] + b]));
+const dungeons = dungeonsData.dungeons.map((d) => ({ ...d, capStats: capStatsOf(d) }));
+
+app.get('/api/dungeons', (req, res) => res.json(dungeons));
 
 app.get('/api/catalog', (req, res) => res.json(catalog));
 
@@ -92,8 +98,14 @@ app.post('/api/advise', handle(async (req, res) => {
   const { stats, dungeonId, progress, disabled, priceOverrides, opts, equipmentItems } = req.body || {};
   // 장비에 따라 달라지는 방법(정령석·인챈트 교체·팔찌)을 이번 계산에만 더한다
   const fullCatalog = [...catalog, ...buildDynamicActions(Array.isArray(equipmentItems) ? equipmentItems.slice(0, 40) : [])];
-  const dungeon = dungeonsData.dungeons.find((d) => d.id === dungeonId);
-  if (!dungeon) return res.status(400).json({ error: '던전을 선택하세요.' });
+  const base = dungeons.find((d) => d.id === dungeonId);
+  if (!base) return res.status(400).json({ error: '던전을 선택하세요.' });
+  // 목표가 만크리/만밸런스면 그 스탯의 요구치를 올려서 계산
+  const goal = opts?.goal || {};
+  const minStats = { ...base.minStats };
+  if (goal.critCap && base.capStats.crit) minStats.crit = base.capStats.crit;
+  if (goal.balCap && base.capStats.bal) minStats.bal = base.capStats.bal;
+  const dungeon = { ...base, minStats };
   if (!stats || typeof stats !== 'object') return res.status(400).json({ error: '스탯이 없습니다.' });
 
   const clean = {};
@@ -125,7 +137,7 @@ app.post('/api/advise', handle(async (req, res) => {
     const on = fullCatalog.filter((a) => a.slot === slot && !off.has(a.id));
     if (on.length > cap) warnings.push(`${slot === 'ring' ? '반지' : slot}는 ${cap}개까지 착용 가능한데 ${on.length}개가 계산에 들어가 있습니다: ${on.map((a) => a.target).join(', ')}`);
   }
-  res.json({ ...result, prices, warnings, mock: nexon.cfg.mock });
+  res.json({ ...result, prices, warnings, goal: { critCap: !!goal.critCap, balCap: !!goal.balCap }, entryStats: base.minStats, mock: nexon.cfg.mock });
 }));
 
 const PORT = Number(process.env.PORT) || 3000;

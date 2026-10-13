@@ -195,3 +195,27 @@ test('오르나·와드네 장비: 착용 부위만 켜지고 진행도·경로�
   const orna = r.plan.find((p) => p.actionId === 'polish-orna-weapon-atk');
   assert.ok(orna.missing.some((n) => n.includes('직접 입력')));
 });
+
+test('만크리·만밸런스: 크리 +50, 밸런스 +100을 목표로 계산한다', async () => {
+  const app = require('../server');
+  const srv = app.listen(0);
+  const port = srv.address().port;
+  try {
+    const ds = await (await fetch(`http://localhost:${port}/api/dungeons`)).json();
+    const d = ds.find((x) => x.minStats.crit && x.minStats.bal);
+    assert.equal(d.capStats.crit, d.minStats.crit + 50);
+    assert.equal(d.capStats.bal, d.minStats.bal + 100);
+    const stats = { ...d.minStats };
+    const post = (goal) => fetch(`http://localhost:${port}/api/advise`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ stats, dungeonId: d.id, progress: {}, disabled: [], opts: { goal } }),
+    }).then((r) => r.json());
+    const entry = await post({});
+    assert.equal(entry.diagnosis.pass, true);
+    const cap = await post({ critCap: true, balCap: true });
+    const row = (k) => cap.diagnosis.rows.find((x) => x.stat === k);
+    assert.equal(row('crit').gap, 50);
+    assert.equal(row('bal').gap, 100);
+    assert.equal(cap.entryStats.crit, d.minStats.crit);
+  } finally { srv.close(); }
+});

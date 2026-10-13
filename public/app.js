@@ -190,10 +190,17 @@ function renderLadder() {
     const reqs = Object.entries(d.minStats).map(([k, v]) =>
       `<span class="${st.short.includes(k) ? 'short' : ''}">${esc(S.meta.statLabels[k])} <b>${fmt(v)}</b></span>`).join('');
     const meta = [d.category, `${d.level}레벨`, `${d.party}인`, d.boss].filter(Boolean).join(', ');
+    const capTxt = Object.entries(d.capStats || {}).map(([k, v]) => {
+      const have = S.stats[k];
+      const name = k === 'crit' ? '만크' : '만밸';
+      const mark = !Number.isFinite(have) ? '' : have >= v ? ' <span class="cap-ok">달성</span>' : ` <span class="cap-short">−${fmt(v - have)}</span>`;
+      return `<span>${name} <b>${fmt(v)}</b>${mark}</span>`;
+    }).join('');
     html.push(`<li class="rung ${st.state} ${d.id === S.dungeonId ? 'selected' : ''}" tabindex="0" role="button" aria-pressed="${d.id === S.dungeonId}" data-id="${d.id}">
       <div><div class="dname">${esc(d.name)}</div><div class="dmeta">${esc(meta)}${d.pureStatsOnly ? ', 순수 능력치 판정' : ''}</div></div>
       <div class="verdict">${verdict}</div>
       <div class="reqs">${reqs}</div>
+      ${capTxt ? `<div class="reqs caps">${capTxt}</div>` : ''}
     </li>`);
   }
   if (!youPlaced) html.push(`<li class="you-line" aria-hidden="true">모든 던전 입장 가능</li>`);
@@ -295,6 +302,9 @@ function setOverride(name, value) {
 let timer = null;
 function scheduleAdvise() { clearTimeout(timer); timer = setTimeout(runAdvise, 350); }
 
+// 계산 목표: 입장 조건 + (선택) 만크리·만밸런스
+S.goal = store.get('hs.goal', { critCap: false, balCap: false });
+
 async function runAdvise() {
   const d = S.dungeons.find((x) => x.id === S.dungeonId);
   if (!d) return;
@@ -309,7 +319,7 @@ async function runAdvise() {
     const r = await api('/api/advise', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ stats: S.stats, dungeonId: d.id, progress: S.progress, disabled: S.disabled, priceOverrides: S.overrides, opts: { luckyMultiplier: S.lucky }, equipmentItems: S.equipItems }),
+      body: JSON.stringify({ stats: S.stats, dungeonId: d.id, progress: S.progress, disabled: S.disabled, priceOverrides: S.overrides, opts: { luckyMultiplier: S.lucky, goal: S.goal }, equipmentItems: S.equipItems }),
     });
     S.lastResult = r;
     renderResult(r, d);
@@ -329,13 +339,26 @@ function gainText(gain) {
 function renderResult(r, d) {
   $('#result').hidden = false;
   const diag = r.diagnosis;
-  $('#resultTitle').textContent = `${d.name}: ${diag.pass ? '입장 조건을 모두 채웠어요' : '부족한 스탯'}`;
-  $('#resultSub').innerHTML = `빠른 전투 최소 입장 능력치 기준${d.pureStatsOnly ? ' (순수 능력치 판정)' : ''}. <a href="${esc(d.source)}" target="_blank" rel="noopener">출처 패치노트</a>`;
+  const goalNames = [r.goal?.critCap && '만크리', r.goal?.balCap && '만밸런스'].filter(Boolean);
+  const goalTxt = goalNames.length ? `입장 조건 + ${goalNames.join('·')}` : '입장 조건';
+  $('#resultTitle').textContent = `${d.name}: ${diag.pass ? `${goalTxt}을 모두 채웠어요` : '부족한 스탯'}`;
+  $('#resultSub').innerHTML = `
+    <span class="goal-pick">목표:
+      <label><input type="checkbox" data-goal="critCap" ${S.goal.critCap ? 'checked' : ''}> 만크리 (크리티컬 ${fmt(d.capStats?.crit)})</label>
+      <label><input type="checkbox" data-goal="balCap" ${S.goal.balCap ? 'checked' : ''}> 만밸런스 (밸런스 ${fmt(d.capStats?.bal)})</label>
+    </span><br>
+    빠른 전투 최소 입장 능력치 기준${goalNames.length ? `에 ${goalNames.join('·')}(크리티컬 요구치 +50, 밸런스 요구치 +100)를 더한 목표` : ''}${d.pureStatsOnly ? ' (순수 능력치 판정)' : ''}. <a href="${esc(d.source)}" target="_blank" rel="noopener">출처 패치노트</a>`;
+  $('#resultSub').querySelectorAll('[data-goal]').forEach((cb) => cb.addEventListener('change', () => {
+    S.goal = { ...S.goal, [cb.dataset.goal]: cb.checked };
+    store.set('hs.goal', S.goal);
+    runAdvise();
+  }));
 
   $('#warnings').innerHTML = (r.warnings || []).map((w) => `<p class="warn">${esc(w)}</p>`).join('');
 
   $('#gaps').innerHTML = diag.rows.map((row) => {
-    const label = S.meta.statLabels[row.stat].replace(/\(.*\)/, '');
+    const capped = (row.stat === 'crit' && r.goal?.critCap) || (row.stat === 'bal' && r.goal?.balCap);
+    const label = S.meta.statLabels[row.stat].replace(/\(.*\)/, '') + (capped ? (row.stat === 'crit' ? ' (만크)' : ' (만밸)') : '');
     if (row.have === null) return `<div class="gauge"><span class="gl">${esc(label)}</span><div class="track"></div><span class="gv">미입력 (필요 ${fmt(row.need)})</span></div>`;
     // 대부분 요구치의 90% 이상이라 0~100%로 그리면 차이가 안 보인다 → 요구치의 80%~100% 구간만 확대
     const scale = (v) => Math.max(0, Math.min(100, ((v / row.need - 0.8) / 0.2) * 100));

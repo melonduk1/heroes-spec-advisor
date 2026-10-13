@@ -200,3 +200,11 @@ table.plan tr.unavail .aname { color: var(--ink-2); font-weight: 500; }
 .char-badge .cname { font-family: var(--serif); font-size: 1.2rem; font-weight: 700; }
 .char-badge .cclass { color: var(--steel); font-weight: 600; }
 .char-badge .clv, .char-badge .ctype { color: var(--ink-2); font-size: .82rem; }
+
+/* 만크리·만밸런스 */
+.rung .reqs.caps { margin-top: -2px; color: var(--ink-2); }
+.rung .reqs.caps b { color: var(--steel); }
+.cap-ok { color: var(--ok); font-weight: 600; }
+.cap-short { color: var(--gap); font-weight: 600; }
+.goal-pick { display: inline-flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; margin-bottom: 4px; color: var(--ink); }
+.goal-pick label { display: inline-flex; gap: 5px; align-items: center; cursor: pointer; }
