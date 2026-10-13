@@ -345,12 +345,15 @@ function renderResult(r, d) {
   $('#perStatTabs').querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => { S.statTab = b.dataset.tab; renderResult(S.lastResult, d); }));
   const rows = S.statTab ? r.perStat[S.statTab] : [];
   $('#perStatTable').innerHTML = S.statTab ? `<thead><tr><th>방법</th><th>다음 단계</th><th class="num">오르는 양</th><th class="num">1포인트당 골드</th></tr></thead>
-    <tbody>${rows.map((x) => `<tr>
+    <tbody>${rows.map((x) => x.status ? `<tr class="unavail">
+      <td><span class="aname">${esc(x.name)}</span></td>
+      <td colspan="3" class="muted">${x.status === 'maxed' ? '이미 끝까지 했어요' : '계산에서 꺼져 있어요 (착용하지 않은 장비이거나 기본으로 꺼 둔 인챈트). 왼쪽 "장비 진행 상황"에서 켤 수 있어요.'}</td>
+    </tr>` : `<tr>
       <td><span class="aname">${esc(x.name)}</span>${x.risky ? ' <span class="tag risk">확률 미반영</span>' : ''}${x.requires ? `<div class="muted">${esc(x.requires)}</div>` : ''}</td>
       <td>${esc(x.stepLabel)}${x.attempts > 1.001 ? `<div class="muted">기대 ${x.attempts.toFixed(2)}회 시도</div>` : ''}</td>
       <td class="num">+${fmt(x.gain)}</td>
       <td class="num"><span class="gold">${fmtGold(x.costPerPoint)}</span>${x.partial ? `<div class="muted">+ 시세 없는 재료 ${x.missing.length}종</div>` : ''}</td>
-    </tr>`).join('') || '<tr><td colspan="4" class="muted">이 스탯을 올릴 수 있는 방법이 남아 있지 않습니다.</td></tr>'}</tbody>` : '';
+    </tr>`).join('') || '<tr><td colspan="4" class="muted">이 계산기에는 이 스탯을 올리는 방법이 없어요. 정령석·팔찌 보석·타이틀처럼 아직 계산에 없는 수단으로 올려야 합니다.</td></tr>'}</tbody>` : '';
   $('#perStatTabs').hidden = !keys.length;
 }
 

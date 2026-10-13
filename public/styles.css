@@ -191,3 +191,5 @@ table.plan .mats { margin: 6px 0 0; padding-left: 16px; font-size: .8rem; color:
 .shopping { margin-top: 12px; }
 .shop-list { list-style: none; padding: 0; margin: 8px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 4px 24px; }
 .shop-list li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dotted var(--line); padding: 3px 0; }
+
+table.plan tr.unavail .aname { color: var(--ink-2); font-weight: 500; }

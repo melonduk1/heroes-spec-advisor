@@ -129,6 +129,12 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
     }
     // 시세가 다 확인된 방법을 먼저, 그 안에서 싼 순서
     list.sort((x, y) => (x.partial - y.partial) || (x.costPerPoint - y.costPerPoint));
+    // 이 스탯을 올릴 수 있지만 지금은 못 하는 방법 (이미 끝까지 함 / 계산에서 꺼짐)
+    const raises = (a) => (a.gain && a.gain[k] > 0) || (a.steps || []).some((st) => st.gain[k] > 0);
+    for (const a of catalog) {
+      if (!raises(a) || list.some((x) => x.actionId === a.id)) continue;
+      list.push({ actionId: a.id, name: a.name, group: a.group, status: off.has(a.id) ? 'off' : 'maxed', requires: a.requires || null });
+    }
     perStat[k] = list;
   }
 
