@@ -5,7 +5,7 @@
 //
 // 출처
 //   정령 합성 확률: https://heroes.nexon.com/Common/NoticePopup?no=27
-//   인챈트 수치: 각 레이드 패치노트, 나무위키 '마비노기 영웅전/인챈트/접두'
+//   인챈트 수치: 각 레이드 패치노트, 나무위키 '마비노기 영웅전/인챈트/접두'·'접미', 게임 내 툴팁(대적자의·신비)
 //   팔찌: https://heroes.nexon.com/news/update/View?postno=1199
 
 const SRC_SPIRIT = 'https://heroes.nexon.com/Common/NoticePopup?no=27';
@@ -85,6 +85,24 @@ const ENCHANTS = {
     '강림': { atk: 450, crit: 2, bal: 2 },
     '운명': { atk: 400, crit: 4, bal: 4 },
     '신비': { atk: 200, crit: 2, bal: 2 }, // 반지·벨트 접미 5랭크
+    // 무기 접미
+    '일격': { atk: 1030, crit: 10, bal: -1 },
+    '원한': { atk: 1000, crit: 7, bal: -1 },
+    '신념': { atk: 970, crit: 5, bal: -1 },
+    // 머리·다리 접미
+    '투혼': { atk: 285, def: 280, crit: 8 },
+    '진격': { atk: 285, def: 280, crit: 5 },
+    '포획': { atk: 285, def: 280, crit: 3 },
+    '원정': { atk: 285, def: 280, crit: 1 },
+    // 가슴 접미
+    '한탄': { def: 120, crit: 9, bal: -1 },
+    '결계': { def: 120, crit: 7, bal: -1 },
+    '낙인': { def: 70, crit: 6, bal: -1 },
+    '보호': { crit: 5, bal: -1 },
+    // 손·발 접미
+    '광분': { atk: 465, def: -300, bal: 7 },
+    '영혼': { atk: 465, def: -300, bal: 5 },
+    '메아리': { atk: 365, def: -260, bal: 4 },
     '고독': { atk: 465, def: -300, bal: 10 },
     '시련': { def: 120, crit: 12, bal: -1 },
   },
@@ -96,6 +114,8 @@ const ENCHANT_TARGETS = [
   { slots: ['Head', 'Lower'], kind: 'prefix', to: '가득한', label: '머리/다리' },
   { slots: ['Upper'], kind: 'prefix', to: '영원한', label: '가슴' },
   { slots: ['Upper'], kind: 'suffix', to: '시련', label: '가슴' },
+  { slots: ['Right Hand'], kind: 'suffix', to: '일격', label: '무기' },
+  { slots: ['Head', 'Lower'], kind: 'suffix', to: '투혼', label: '머리/다리' },
   { slots: ['Hand', 'Leg'], kind: 'prefix', to: '물드는', label: '손/발' },
   { slots: ['Hand', 'Leg'], kind: 'suffix', to: '고독', label: '손/발' },
   { slots: ['Left Hand'], kind: 'prefix', to: '공허한', label: '보조 장비' },
