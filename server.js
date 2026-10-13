@@ -62,9 +62,19 @@ app.get('/api/debug/equipment', handle(async (req, res) => {
   res.json(await nexon.getEquipmentRaw(name));
 }));
 
+// 거래소 원본 응답 확인용
+app.get('/api/debug/auction', handle(async (req, res) => {
+  const item = String(req.query.item || '고급 강화의 비약').trim();
+  res.json(await nexon.getAuctionRaw(item));
+}));
+
 app.get('/api/prices', handle(async (req, res) => {
   const prices = await nexon.getPrices(allItems);
-  res.json({ mock: nexon.cfg.mock, prices, fetchedAt: new Date().toISOString() });
+  const vals = Object.values(prices);
+  const found = vals.filter((p) => p.unit != null).length;
+  const firstError = vals.find((p) => p.error)?.error || null;
+  if (!nexon.cfg.mock && found === 0) console.warn(`거래소 시세를 하나도 못 불러왔습니다. 오류: ${firstError || '응답에서 가격을 찾지 못함'} → /api/debug/auction 으로 원본 응답을 확인하세요.`);
+  res.json({ mock: nexon.cfg.mock, prices, found, total: vals.length, firstError, fetchedAt: new Date().toISOString() });
 }));
 
 app.post('/api/advise', handle(async (req, res) => {

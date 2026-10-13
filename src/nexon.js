@@ -121,6 +121,17 @@ async function getPrices(names) {
   return out;
 }
 
+// 거래소 원본 응답 — 스키마 확인용
+async function getAuctionRaw(itemName) {
+  if (cfg.mock) return { mock: true, note: '목업 모드에서는 거래소를 조회하지 않습니다.' };
+  const out = { path: cfg.pathAuction, param: cfg.auctionItemParam, item: itemName };
+  try {
+    out.response = await call(cfg.pathAuction, { [cfg.auctionItemParam]: itemName });
+    out.parsedUnitPrices = unitPricesFrom(out.response).slice(0, 20);
+  } catch (e) { out.error = e.message; out.status = e.status; out.body = e.body; }
+  return out;
+}
+
 // 장비(인챈트·강화·연마) 원본 응답 — 스키마 확인용
 async function getEquipmentRaw(name) {
   if (cfg.mock) return { mock: true, note: '목업 모드에서는 장비 정보를 불러오지 않습니다. NEXON_API_KEY를 넣고 다시 실행하세요.' };
@@ -130,4 +141,4 @@ async function getEquipmentRaw(name) {
   return out;
 }
 
-module.exports = { cfg, getCharacter, getEquipmentRaw, getPrices, unitPricesFrom, median };
+module.exports = { cfg, getCharacter, getEquipmentRaw, getAuctionRaw, getPrices, unitPricesFrom, median };

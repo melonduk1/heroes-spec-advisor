@@ -123,12 +123,12 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
       if (!e || !(e.step.gain[k] > 0)) continue;
       list.push({
         actionId: a.id, name: a.name, group: a.group, stepLabel: e.step.label,
-        gain: e.step.gain[k], costPerPoint: e.missing.length ? null : e.cost / e.step.gain[k],
-        knownGoldPerPoint: (priceCost(e.step.cost, prices).gold * e.attempts) / e.step.gain[k],
+        gain: e.step.gain[k], costPerPoint: e.cost / e.step.gain[k], partial: e.missing.length > 0,
         missing: e.missing, attempts: e.attempts, risky: !!a.risky, requires: a.requires || null,
       });
     }
-    list.sort((x, y) => (x.costPerPoint ?? Infinity) - (y.costPerPoint ?? Infinity));
+    // 시세가 다 확인된 방법을 먼저, 그 안에서 싼 순서
+    list.sort((x, y) => (x.partial - y.partial) || (x.costPerPoint - y.costPerPoint));
     perStat[k] = list;
   }
 
@@ -137,22 +137,27 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
   const blocked = []; // 시세를 몰라서 제외된 후보
   let iter = 0;
   while (Object.values(remaining).some((v) => v > 0) && iter++ < o.maxIterations) {
+    // 시세가 모두 확인된 방법 중 가장 싼 것을 고르고, 그런 방법이 없을 때만
+    // 일부 재료 시세를 모르는 방법을 '아는 비용'만으로 비교해 고른다.
     let best = null;
+    let bestPartial = null;
     for (const a of catalog) {
       if (off.has(a.id)) continue;
       const e = evalStep(a);
       if (!e || e.value <= 0) continue;
+      const eff = e.cost / (e.value * 100); // 부족분 1%당 골드
       if (e.missing.length) {
         if (!blocked.find((b) => b.actionId === a.id)) blocked.push({ actionId: a.id, name: a.name, missing: e.missing });
+        if (!bestPartial || eff < bestPartial.eff) bestPartial = { a, e, eff };
         continue;
       }
-      const eff = e.cost / (e.value * 100); // 부족분 1%당 골드
       if (!best || eff < best.eff) best = { a, e, eff };
     }
+    best = best || bestPartial;
     if (!best) break;
     const { a, e, eff } = best;
     for (const [k, g] of Object.entries(e.step.gain)) if (remaining[k] !== undefined) remaining[k] = Math.max(0, remaining[k] - g);
-    steps.push({ actionId: a.id, name: a.name, group: a.group, target: a.target, stepLabel: e.step.label, gain: e.step.gain, cost: e.cost, attempts: e.attempts, eff, breakdown: e.breakdown, risky: !!a.risky, requires: a.requires || null, source: a.source });
+    steps.push({ actionId: a.id, name: a.name, group: a.group, target: a.target, stepLabel: e.step.label, gain: e.step.gain, cost: e.cost, attempts: e.attempts, eff, missing: e.missing, breakdown: e.breakdown, risky: !!a.risky, requires: a.requires || null, source: a.source });
     state[a.id] += 1;
   }
 
@@ -165,6 +170,7 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
       last.count += 1;
       last.cost += s.cost;
       last.toLabel = s.stepLabel;
+      for (const m of s.missing) if (!last.missing.includes(m)) last.missing.push(m);
       for (const [k, v] of Object.entries(s.gain)) last.gain[k] = (last.gain[k] || 0) + v;
       for (const b of s.breakdown) {
         const m = last.materials[b.name] || { qty: 0, unit: b.unit };
@@ -179,6 +185,7 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
         actionId: s.actionId, name: s.name, group: s.group, target: s.target,
         fromLabel: s.stepLabel, toLabel: s.stepLabel, count: 1, cost: s.cost,
         gain: { ...s.gain }, materials, risky: s.risky, requires: s.requires, source: s.source,
+        missing: [...s.missing],
         avgEff: 0,
         goldDirect: (s.cost / s.attempts - s.breakdown.reduce((t, b) => t + (b.unit || 0) * b.qty, 0)) * s.attempts,
       };
@@ -193,6 +200,10 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
   }
 
   const totalCost = plan.reduce((s, p) => s + p.cost, 0);
+  const unpricedInPlan = [...new Set(plan.flatMap((p) => p.missing))];
+  // 계획에 실제로 들어간 방법은 '빠진 방법' 목록에서 뺀다
+  const planned = new Set(plan.map((p) => p.actionId));
+  for (let i = blocked.length - 1; i >= 0; i--) if (planned.has(blocked[i].actionId)) blocked.splice(i, 1);
   const unresolved = Object.entries(remaining).filter(([, v]) => v > 0).map(([stat, gap]) => ({ stat, gap }));
   const projected = { ...stats };
   for (const p of plan) for (const [k, g] of Object.entries(p.gain)) if (projected[k] !== undefined) projected[k] += g;
@@ -206,6 +217,7 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
     projected,
     perStat,
     blocked,
+    unpricedInPlan,
     assumptions: {
       luckyMultiplier: o.luckyMultiplier,
     },

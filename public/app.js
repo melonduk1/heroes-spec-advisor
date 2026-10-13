@@ -305,13 +305,14 @@ function renderResult(r, d) {
 
   // 추천 경로
   if (diag.pass) {
-    $('#planSummary').innerHTML = `<span class="note">더 올릴 스탯이 없습니다. 다른 던전을 골라 보세요.</span>`;
+    $('#planSummary').innerHTML = `<span class="note">이 던전의 입장 조건을 이미 모두 넘어서 채울 부족분이 없어요. 위 목록에서 빨간 표시(스탯 부족)가 있는 던전을 고르면 성장 순서가 나옵니다.</span>`;
     $('#planTable').innerHTML = '';
   } else {
     const solved = r.unresolved.length === 0;
     $('#planSummary').innerHTML = `
       <span><span class="big">${fmtGold(r.totalCost)}</span> 골드</span>
-      <span class="note">${solved ? '이대로 하면 모든 부족분이 채워집니다.' : '계산 가능한 방법만으로는 일부가 남습니다 (아래 참고).'} 강화 비용은 연속 실패 보너스까지 반영한 기대값입니다.</span>`;
+      <span class="note">${solved ? '이대로 하면 모든 부족분이 채워집니다.' : '계산 가능한 방법만으로는 일부가 남습니다 (아래 참고).'} 강화 비용은 연속 실패 보너스까지 반영한 기대값입니다.</span>
+      ${r.unpricedInPlan?.length ? `<p class="warn" style="flex-basis:100%">거래소 시세를 못 찾은 재료 ${r.unpricedInPlan.length}종(${esc(r.unpricedInPlan.slice(0, 6).join(', '))}${r.unpricedInPlan.length > 6 ? ' 등' : ''})은 비용에서 빠져 있어서, 실제 비용은 이보다 큽니다. 아래 "재료 시세"에서 가격을 넣으면 정확해져요.</p>` : ''}`;
     $('#planTable').innerHTML = `<thead><tr><th class="num">순서</th><th>방법</th><th>오르는 스탯</th><th class="num">비용</th><th class="num">부족분 1%당</th></tr></thead>
       <tbody>${r.plan.map((p, i) => planRow(p, i)).join('') || `<tr><td colspan="5" class="muted">계산할 수 있는 방법이 없습니다. 장비 진행 상황과 재료 시세를 확인해 주세요.</td></tr>`}</tbody>`;
   }
@@ -323,7 +324,7 @@ function renderResult(r, d) {
   // 시세가 없어 빠진 후보
   if (r.blocked.length) {
     const missing = [...new Set(r.blocked.flatMap((b) => b.missing))];
-    $('#blocked').innerHTML = `<div class="box"><h4>시세를 몰라 계산에서 빠진 방법</h4>
+    $('#blocked').innerHTML = `<div class="box"><h4>시세를 몰라 비교에서 뒤로 밀린 방법</h4>
       <p class="hint" style="margin-top:0">${r.blocked.map((b) => esc(b.name)).join(', ')}</p>
       <p class="hint">아래 재료에 가격을 넣으면 바로 다시 계산합니다. 귀속 재료라면 주간 보상·인장으로 얻는 데 드는 노력을 골드로 환산해 넣거나, 이미 있으면 0을 넣으세요.</p>
       ${missing.map((n) => `<div class="pi"><span>${esc(n)}</span><input type="number" min="0" data-price="${esc(n)}" value="${S.overrides[n] ?? ''}" placeholder="골드" aria-label="${esc(n)} 가격"></div>`).join('')}
@@ -342,7 +343,7 @@ function renderResult(r, d) {
       <td><span class="aname">${esc(x.name)}</span>${x.risky ? ' <span class="tag risk">확률 미반영</span>' : ''}${x.requires ? `<div class="muted">${esc(x.requires)}</div>` : ''}</td>
       <td>${esc(x.stepLabel)}${x.attempts > 1.001 ? `<div class="muted">기대 ${x.attempts.toFixed(2)}회 시도</div>` : ''}</td>
       <td class="num">+${fmt(x.gain)}</td>
-      <td class="num">${x.costPerPoint == null ? `<span class="muted">시세 필요: ${esc(x.missing.join(', '))}</span>` : `<span class="gold">${fmtGold(x.costPerPoint)}</span>`}</td>
+      <td class="num"><span class="gold">${fmtGold(x.costPerPoint)}</span>${x.partial ? `<div class="muted">+ 시세 없는 재료 ${x.missing.length}종</div>` : ''}</td>
     </tr>`).join('') || '<tr><td colspan="4" class="muted">이 스탯을 올릴 수 있는 방법이 남아 있지 않습니다.</td></tr>'}</tbody>` : '';
   $('#perStatTabs').hidden = !keys.length;
 }
@@ -353,7 +354,7 @@ function planRow(p, i) {
     `<li>${esc(n)} ${m.qty % 1 ? m.qty.toFixed(1) : fmt(m.qty)}개 × ${m.unit == null ? '?' : fmt(m.unit)}</li>`).join('');
   return `<tr>
     <td class="num">${i + 1}</td>
-    <td><span class="tag">${esc(p.group)}</span>${p.risky ? '<span class="tag risk">확률 미반영</span>' : ''}<span class="aname">${esc(p.name)}</span>
+    <td><span class="tag">${esc(p.group)}</span>${p.risky ? '<span class="tag risk">확률 미반영</span>' : ''}${p.missing?.length ? '<span class="tag risk">시세 일부 없음</span>' : ''}<span class="aname">${esc(p.name)}</span>
       <div class="muted">${esc(range)}</div>
       ${p.requires ? `<div class="muted">${esc(p.requires)}</div>` : ''}
       <details><summary>재료 보기</summary><ul class="mats"><li>골드 ${fmt(p.goldDirect)}</li>${mats}</ul>
@@ -379,7 +380,15 @@ function planRow(p, i) {
     renderStatForm();
     renderGear();
     renderLadder();
-    api('/api/prices').then((p) => { S.prices = p.prices; renderPrices(); }).catch(() => {});
+    api('/api/prices').then((p) => {
+      S.prices = p.prices;
+      renderPrices();
+      if (!p.mock && p.found === 0) {
+        document.querySelector('.main').insertAdjacentHTML('afterbegin', `<p class="warn">거래소 시세를 하나도 불러오지 못했어요${p.firstError ? ` (${esc(p.firstError)})` : ''}. 성장 순서는 골드 비용만으로 비교합니다. <a href="/api/debug/auction" target="_blank" rel="noopener">거래소 응답 확인</a> 결과를 개발자에게 알려 주세요.</p>`);
+      } else if (!p.mock && p.found < p.total) {
+        $('#pricesBox summary .sub').textContent = `재료 ${p.total}종 중 ${p.found}종 시세 확인, 나머지는 직접 입력할 수 있어요`;
+      }
+    }).catch(() => {});
     if (S.dungeonId) runAdvise();
   } catch (err) {
     document.querySelector('.main').insertAdjacentHTML('afterbegin', `<p class="warn">서버에 연결하지 못했습니다: ${esc(err.message)}. 서버가 실행 중인지 확인해 주세요.</p>`);
