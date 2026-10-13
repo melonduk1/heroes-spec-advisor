@@ -370,7 +370,15 @@
         "순수 능력치로 판정"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1199",
-      "caps": null
+      "caps": {
+        "atk": 62000,
+        "crit": 279,
+        "bal": 134,
+        "critResist": 287,
+        "source": "https://www.mhon.kr/raid",
+        "label": "타로스(일반)",
+        "checked": "2026-10-13"
+      }
     },
     {
       "id": "watcher-temple",
