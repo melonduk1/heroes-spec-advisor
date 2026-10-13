@@ -195,3 +195,8 @@ table.plan .mats { margin: 6px 0 0; padding-left: 16px; font-size: .8rem; color:
 table.plan tr.unavail .aname { color: var(--ink-2); font-weight: 500; }
 
 .equip-table td:nth-child(5) { white-space: nowrap; }
+
+.char-badge { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 12px; }
+.char-badge .cname { font-family: var(--serif); font-size: 1.2rem; font-weight: 700; }
+.char-badge .cclass { color: var(--steel); font-weight: 600; }
+.char-badge .clv, .char-badge .ctype { color: var(--ink-2); font-size: .82rem; }

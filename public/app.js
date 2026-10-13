@@ -22,6 +22,7 @@ const S = {
   baseCatalog: [],
   equipItems: store.get('hs.equipItems', []),
   dynamic: store.get('hs.dynamic', []),
+  attackType: store.get('hs.attackType', null),
   stats: store.get('hs.stats', {}),
   apiStats: {},
   progress: store.get('hs.progress', {}),
@@ -44,8 +45,9 @@ async function api(path, opts) {
 // ───────────── 스탯 입력 ─────────────
 function renderStatForm() {
   const box = $('#statForm');
+  const atkLabel = S.attackType === 'magic' ? '마법 공격력' : S.attackType === 'physical' ? '공격력' : S.meta.statLabels.atk;
   box.innerHTML = S.meta.statKeys.map((k) => `
-    <label class="${S.apiStats[k] !== undefined ? 'from-api' : ''}">${esc(S.meta.statLabels[k])}
+    <label class="${S.apiStats[k] !== undefined ? 'from-api' : ''}">${esc(k === 'atk' ? atkLabel : S.meta.statLabels[k])}
       <input type="number" inputmode="numeric" data-stat="${k}" value="${S.stats[k] ?? ''}" placeholder="0">
     </label>`).join('');
   box.querySelectorAll('input').forEach((inp) => inp.addEventListener('input', () => {
@@ -84,10 +86,13 @@ $('#lookupForm').addEventListener('submit', async (e) => {
     S.stats = { ...r.stats };
     store.set('hs.stats', S.stats);
     applyEquipment(r.equipment);
-    const lv = r.basic?.character_level ? `, ${r.basic.character_level}레벨` : '';
+    const lv = [r.className, r.basic?.character_level ? `${r.basic.character_level}레벨` : null].filter(Boolean).join(', ');
+    S.attackType = r.attackType;
+    store.set('hs.attackType', S.attackType);
+    renderCharBadge(r);
     msg.textContent = r.missing.length
-      ? `${r.name}${lv} 불러옴. 응답에 없던 스탯(${r.missing.map((k) => S.meta.statLabels[k]).join(', ')})은 직접 입력해 주세요.`
-      : `${r.name}${lv} 스탯을 불러왔어요.`;
+      ? `${r.name}${lv ? ` (${lv})` : ''} 불러옴. 응답에 없던 스탯(${r.missing.map((k) => S.meta.statLabels[k]).join(', ')})은 직접 입력해 주세요.`
+      : `${r.name}${lv ? ` (${lv})` : ''} 스탯을 불러왔어요.`;
     renderStatForm();
     renderLadder();
     scheduleAdvise();
@@ -143,6 +148,18 @@ function applyEquipment(eq) {
     </table>
     <p class="hint">정령은 지금 사용 중인 프리셋의 정령 합성 능력치예요. 장비 진행 상황(연마·강화·승급·인챈트·정령)에도 자동으로 반영했어요.</p>
     ${eq.notes.map((n) => `<p class="hint">${esc(n)}</p>`).join('')}</details>`;
+}
+
+// 불러온 캐릭터 이름·클래스 표시
+function renderCharBadge(r) {
+  const box = $('#charBadge');
+  if (!box) return;
+  const type = r.attackType === 'magic' ? '마법 공격력 캐릭터' : r.attackType === 'physical' ? '물리 공격력 캐릭터' : '';
+  box.innerHTML = r.className
+    ? `<span class="cname">${esc(r.name)}</span><span class="cclass">${esc(r.className)}</span>${r.basic?.character_level ? `<span class="clv">${esc(r.basic.character_level)}레벨</span>` : ''}${type ? `<span class="ctype">${type}</span>` : ''}`
+    : '';
+  box.hidden = !r.className;
+  store.set('hs.badge', { name: r.name, className: r.className, attackType: r.attackType, basic: { character_level: r.basic?.character_level } });
 }
 
 // ───────────── 던전 사다리 ─────────────
@@ -439,6 +456,8 @@ function planRow(p, i) {
     $('#dataDate').textContent = meta.dungeonsUpdated;
     $('#lucky').value = S.lucky;
     if (window.matchMedia('(max-width: 900px)').matches) $('#gearPanel').open = false;
+    const badge = store.get('hs.badge', null);
+    if (badge) renderCharBadge(badge);
     renderStatForm();
     renderGear();
     renderLadder();

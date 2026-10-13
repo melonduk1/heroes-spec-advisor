@@ -53,16 +53,20 @@ function collectPairs(node, out = []) {
   return out;
 }
 
-function extractStats(raw) {
+// 마법 공격력으로 싸우는 캐릭터 (2026-02-05 패치노트 '진영 스킬이 마법 공격력 대신 공격력에 영향받던 현상 수정' 대상 목록)
+const MAGIC_CLASSES = ['이비', '아리샤', '헤기', '미울', '테사', '단아', '라티야', '체른', '네반'];
+const attackType = (cls) => (!cls ? null : MAGIC_CLASSES.includes(cls) ? 'magic' : 'physical');
+
+function extractStats(raw, className) {
   const found = {};
   for (const [name, value] of collectPairs(raw)) {
     const key = matchKey(name);
     if (key && found[key] === undefined) found[key] = value;
   }
-  // 마법 공격력 캐릭터는 둘 중 큰 값을 공격력으로 본다 (입장 조건이 '공격력(마법 공격력)')
-  if (found.matk !== undefined) {
-    found.atk = Math.max(found.atk ?? 0, found.matk);
-  }
+  // 입장 조건의 '공격력(마법 공격력)'은 캐릭터가 쓰는 쪽으로 본다. 캐릭터를 모르면 큰 값.
+  const type = attackType(className);
+  if (type === 'magic' && found.matk !== undefined) found.atk = found.matk;
+  else if (type === null && found.matk !== undefined) found.atk = Math.max(found.atk ?? 0, found.matk);
   delete found.matk;
   const stats = {};
   const missing = [];
@@ -73,4 +77,4 @@ function extractStats(raw) {
   return { stats, missing };
 }
 
-module.exports = { extractStats, STAT_KEYS, STAT_ALIASES };
+module.exports = { attackType, MAGIC_CLASSES, extractStats, STAT_KEYS, STAT_ALIASES };

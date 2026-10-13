@@ -138,3 +138,10 @@ test('인챈트 데이터: 주요 수치', () => {
   assert.deepEqual(ENCHANTS.suffix['격노'], { def: 400 });
   assert.ok(Object.keys(ENCHANTS.prefix).length > 70 && Object.keys(ENCHANTS.suffix).length > 50);
 });
+
+test('클래스에 따라 공격력/마법 공격력 선택', () => {
+  const raw = { stat: [{ stat_name: '공격력', stat_value: '81386' }, { stat_name: '마법공격력', stat_value: '82461' }] };
+  assert.equal(extractStats(raw, '단아').stats.atk, 82461);   // 마법
+  assert.equal(extractStats(raw, '리시타').stats.atk, 81386); // 물리
+  assert.equal(extractStats(raw).stats.atk, 82461);           // 모르면 큰 값
+});

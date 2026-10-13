@@ -8,7 +8,7 @@ const express = require('express');
 const dungeonsData = require('./data/dungeons.json');
 const { buildCatalog, SLOT_CAPACITY } = require('./src/catalog');
 const { advise, itemsInCatalog } = require('./src/advisor');
-const { extractStats, STAT_KEYS } = require('./src/stats');
+const { extractStats, attackType, STAT_KEYS } = require('./src/stats');
 const nexon = require('./src/nexon');
 const { parseEquipment } = require('./src/equipment');
 const { buildDynamicActions, DYNAMIC_ITEMS } = require('./src/dynamic');
@@ -44,10 +44,13 @@ app.get('/api/character', handle(async (req, res) => {
   const name = String(req.query.name || '').trim();
   if (!name) return res.status(400).json({ error: '캐릭터 이름을 입력하세요.' });
   const ch = await nexon.getCharacter(name);
-  const { stats, missing } = extractStats(ch.stat);
+  const className = ch.basic?.character_class_name || null;
+  const { stats, missing } = extractStats(ch.stat, className);
   res.json({
     name: ch.basic?.character_name || name,
     basic: ch.basic,
+    className,
+    attackType: attackType(className),
     stats,
     missing,
     mock: ch.mock,
