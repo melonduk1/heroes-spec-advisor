@@ -109,7 +109,14 @@
         "하루 1회 성공 제한, 피로도 16%"
       ],
       "source": "https://heroes.nexon.com/news/update/view?postno=1194",
-      "caps": null
+      "caps": {
+        "atk": 72120,
+        "crit": 346,
+        "bal": 187,
+        "critResist": 382,
+        "source": "https://www.mhon.kr/raid",
+        "checked": "2026-10-13"
+      }
     },
     {
       "id": "forgotten-cathedral",
