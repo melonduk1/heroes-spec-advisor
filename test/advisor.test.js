@@ -94,3 +94,13 @@ test('장비 응답 → 진행 상황 (실제 응답 샘플)', () => {
   assert.equal(progress['enchant-advent'], 1);
   assert.equal(progress['enchant-transcend'], 1);
 });
+
+test('거래소 응답 → 최근 평균가 (실제 응답 샘플)', () => {
+  const { priceFromMarket } = require('../src/nexon');
+  const body = require('./fixtures/market-history-sample.json');
+  const p = priceFromMarket(body, '고급 강화의 비약');
+  assert.equal(p.unit, 319401);              // 가장 최근(2026-10-13T04:00Z) 평균가
+  assert.equal(p.at, '2026-10-13T04:00:00Z');
+  assert.equal(priceFromMarket(body, '없는 아이템'), null);
+  assert.equal(priceFromMarket({ item: [] }, 'x'), null);
+});

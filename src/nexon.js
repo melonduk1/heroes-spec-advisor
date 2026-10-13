@@ -36,14 +36,37 @@ async function call(p, params) {
   return body;
 }
 
-// ── 짧은 캐시 (거래소 시세는 10분) ──
+// ── 캐시 (같은 키를 동시에 요청하면 한 번만 호출) ──
 const cache = new Map();
+const inflight = new Map();
 async function cached(key, ttlMs, fn) {
   const hit = cache.get(key);
   if (hit && Date.now() - hit.t < ttlMs) return hit.v;
-  const v = await fn();
-  cache.set(key, { t: Date.now(), v });
-  return v;
+  if (inflight.has(key)) return inflight.get(key);
+  const p = (async () => {
+    try {
+      const v = await fn();
+      if (!v?.noCache) cache.set(key, { t: Date.now(), v });
+      return v;
+    } finally { inflight.delete(key); }
+  })();
+  inflight.set(key, p);
+  return p;
+}
+
+// 넥슨 API 호출 간격 (호출 한도 보호). 거래소 조회는 이 큐를 통해 순서대로 보낸다.
+const GAP_MS = Number(process.env.NEXON_CALL_GAP_MS) || 250;
+let lastCallAt = 0;
+let gate = Promise.resolve();
+function throttled(fn) {
+  const run = gate.then(async () => {
+    const wait = lastCallAt + GAP_MS - Date.now();
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    lastCallAt = Date.now();
+    return fn();
+  });
+  gate = run.catch(() => {});
+  return run;
 }
 
 async function getCharacter(name) {
@@ -84,6 +107,19 @@ function unitPricesFrom(node, out = []) {
   return out.filter((x) => Number.isFinite(x) && x > 0);
 }
 
+// /marketplace/market-history 응답:
+//   { item: [{ date_update, item_name, average_price, min_price, max_price, item_option }], next_cursor }
+// 시간별 기록이 쌓여 오므로, 이름이 정확히 같고 옵션이 없는 기록 중 가장 최근 것의 평균가를 쓴다.
+function priceFromMarket(body, itemName) {
+  const rows = Array.isArray(body?.item) ? body.item : [];
+  const exact = rows.filter((r) => r.item_name === itemName && Number(r.average_price) > 0);
+  const plain = exact.filter((r) => !r.item_option);
+  const pool = plain.length ? plain : exact;
+  if (!pool.length) return null;
+  const latest = pool.reduce((a, b) => (String(a.date_update) >= String(b.date_update) ? a : b));
+  return { unit: Number(latest.average_price), min: Number(latest.min_price) || null, max: Number(latest.max_price) || null, at: latest.date_update, samples: pool.length };
+}
+
 function median(xs) {
   if (!xs.length) return null;
   const s = [...xs].sort((a, b) => a - b);
@@ -103,9 +139,17 @@ async function getPrice(itemName) {
     return { item: itemName, unit: prices[itemName] ?? null, samples: prices[itemName] ? 1 : 0, mock: true };
   }
   if (Date.now() < auctionBlockedUntil) return { item: itemName, unit: null, samples: 0, error: auctionBlockedReason, mock: false };
-  return cached(`price:${itemName}`, 10 * 60 * 1000, async () => {
+  // 거래소 데이터는 1시간 단위로 갱신되므로 2시간 캐시 (호출 한도 절약)
+  return cached(`price:${itemName}`, 2 * 60 * 60 * 1000, async () => {
+    if (Date.now() < auctionBlockedUntil) return { item: itemName, unit: null, samples: 0, error: auctionBlockedReason, mock: false, noCache: true };
     try {
-      const body = await call(cfg.pathAuction, { [cfg.auctionItemParam]: itemName });
+      const body = await throttled(() => {
+        // 큐에서 기다리는 사이 막혔으면 호출하지 않는다
+        if (Date.now() < auctionBlockedUntil) { const e = new Error(auctionBlockedReason); e.skipped = true; throw e; }
+        return call(cfg.pathAuction, { [cfg.auctionItemParam]: itemName });
+      });
+      const m = priceFromMarket(body, itemName);
+      if (m) return { item: itemName, ...m, mock: false };
       const xs = unitPricesFrom(body);
       return { item: itemName, unit: median(xs), samples: xs.length, mock: false };
     } catch (e) {
@@ -114,24 +158,17 @@ async function getPrice(itemName) {
         auctionBlockedReason = e.status === 403
           ? '거래소 API 권한 없음 (OPENAPI00002)'
           : 'API 호출 한도 초과 (OPENAPI00007), 잠시 뒤 다시 시도';
-        cache.delete(`price:${itemName}`);
       }
-      return { item: itemName, unit: null, samples: 0, error: auctionBlockedReason || e.message, mock: false };
+      return { item: itemName, unit: null, samples: 0, error: auctionBlockedReason || e.message, mock: false, noCache: true };
     }
   });
 }
 
 async function getPrices(names) {
   const out = {};
-  // 호출 제한을 고려해 2개씩, 막히면 바로 멈춤
-  const queue = [...names];
-  const workers = Array.from({ length: 2 }, async () => {
-    while (queue.length) {
-      const n = queue.shift();
-      out[n] = await getPrice(n);
-    }
-  });
-  await Promise.all(workers);
+  // 실제 호출은 throttled() 큐가 순서대로 간격을 두고 보낸다
+  const results = await Promise.all(names.map((n) => getPrice(n)));
+  names.forEach((n, i) => { const { noCache, ...r } = results[i]; out[n] = r; });
   return out;
 }
 
@@ -142,7 +179,7 @@ async function getAuctionRaw(itemName, paramName) {
   const out = { path: cfg.pathAuction, param, item: itemName };
   try {
     out.response = await call(cfg.pathAuction, itemName ? { [param]: itemName } : {});
-    out.parsedUnitPrices = unitPricesFrom(out.response).slice(0, 20);
+    out.parsed = priceFromMarket(out.response, itemName);
   } catch (e) { out.error = e.message; out.status = e.status; out.body = e.body; }
   return out;
 }
@@ -156,4 +193,4 @@ async function getEquipmentRaw(name) {
   return out;
 }
 
-module.exports = { cfg, getCharacter, getEquipmentRaw, getAuctionRaw, getPrices, unitPricesFrom, median };
+module.exports = { priceFromMarket, cfg, getCharacter, getEquipmentRaw, getAuctionRaw, getPrices, unitPricesFrom, median };
