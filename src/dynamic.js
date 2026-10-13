@@ -86,6 +86,9 @@ const ENCHANTS = {
     '운명': { atk: 400, crit: 4, bal: 4 },
     '신비': { atk: 200, crit: 2, bal: 2 }, // 반지·벨트 접미 5랭크
     '격노': { def: 400 }, // 액세서리 접미 5랭크 (스태미나·크리티컬 저항은 계산 제외)
+    '소망': { def: 300 },          // 액세서리 접미 6랭크
+    '사념': { def: 500, bal: 1 },  // 액세서리 접미 4랭크
+    '물결': { atk: 300 },          // 액세서리 접미 4랭크 (스태미나 회복 효과)
     // 무기 접미
     '일격': { atk: 1030, crit: 10, bal: -1 },
     '원한': { atk: 1000, crit: 7, bal: -1 },
@@ -124,6 +127,7 @@ const ENCHANT_TARGETS = [
   { slots: ['Right Finger', 'Left Finger', 'Belt'], kind: 'suffix', to: '운명', label: '반지/벨트' },
   { slots: ['Belt'], kind: 'prefix', to: '메마른', label: '벨트' },
   { slots: ['Charm'], kind: 'prefix', to: '초월의', label: '브로치' },
+  { slots: ['Earring', 'Necklace', 'Charm'], kind: 'suffix', to: '사념', label: '귀걸이/목걸이/브로치' },
   { slots: ['Artifact'], kind: 'suffix', to: '강림', label: '아티팩트' },
 ];
 
