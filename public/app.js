@@ -97,6 +97,8 @@ $('#lookupForm').addEventListener('submit', async (e) => {
   }
 });
 
+const SHORT_STAT = { '크리티컬': '크리', '방어력': '방어', '최대 생명력': '생명력', '공격력': '공격', '마법공격력': '마공', '마법 공격력': '마공', '크리티컬 저항': '크저', '공격속도': '공속' };
+
 // 장비 API에서 연마 횟수·강화 단계·승급 등급·인챈트를 채운다
 function applyEquipment(eq) {
   const box = $('#equipSummary');
@@ -130,15 +132,16 @@ function applyEquipment(eq) {
   const noEnchant = '<span class="none">없음</span>';
   box.innerHTML = `<details class="equip" open><summary>장착 장비와 인챈트 (${eq.items.length}개)</summary>
     <table class="equip-table">
-      <thead><tr><th>부위</th><th>장비</th><th>접두</th><th>접미</th></tr></thead>
+      <thead><tr><th>부위</th><th>장비</th><th>접두</th><th>접미</th><th>정령</th></tr></thead>
       <tbody>${eq.items.map((i) => `<tr>
         <td class="eslot">${esc(SLOT[i.slot] || i.slot)}</td>
         <td>${esc(i.name)}${i.enhancement ? ` <span class="enh">+${i.enhancement}</span>` : ''}</td>
         <td>${i.prefix ? esc(i.prefix) : noEnchant}</td>
         <td>${i.suffix ? esc(i.suffix) : noEnchant}</td>
+        <td title="${i.infusion ? esc(i.infusion.name) : ''}">${i.infusion ? `${esc(SHORT_STAT[i.infusion.name] || i.infusion.name)} ${i.infusion.value > 0 ? '+' : ''}${fmt(i.infusion.value)}` : noEnchant}</td>
       </tr>`).join('')}</tbody>
     </table>
-    <p class="hint">장비 진행 상황(연마·강화·승급·인챈트)에도 자동으로 반영했어요.</p>
+    <p class="hint">정령은 지금 사용 중인 프리셋의 정령 합성 능력치예요. 장비 진행 상황(연마·강화·승급·인챈트·정령)에도 자동으로 반영했어요.</p>
     ${eq.notes.map((n) => `<p class="hint">${esc(n)}</p>`).join('')}</details>`;
 }
 
