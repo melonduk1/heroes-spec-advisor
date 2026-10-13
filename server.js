@@ -36,11 +36,18 @@ app.get('/api/meta', (req, res) => {
   });
 });
 
-// 만크리 = 몬스터 크리티컬 저항 + 50, 만밸런스 = 몬스터 밸런스 저항 + 100
-// 저항 수치는 data/dungeons.json 의 resist { crit, bal } — 값이 없는 던전은 표시하지 않는다
+// 던전 상한: 공상(공격력 2차 변곡점)·만크·만밸
+// data/dungeons.json 의 caps { atk, crit, bal } 를 쓰고, 없으면 resist(몬스터 저항)로
+// 만크 = 크리티컬 저항 + 50, 만밸 = 밸런스 저항 + 100. 둘 다 없으면 표시하지 않는다.
 const CAP_BONUS = { crit: 50, bal: 100 };
-const capStatsOf = (d) => Object.fromEntries(Object.entries(CAP_BONUS)
-  .filter(([k]) => Number.isFinite(d.resist?.[k])).map(([k, b]) => [k, d.resist[k] + b]));
+const capStatsOf = (d) => {
+  const out = {};
+  for (const k of ['atk', 'crit', 'bal']) {
+    if (Number.isFinite(d.caps?.[k])) out[k] = d.caps[k];
+    else if (CAP_BONUS[k] && Number.isFinite(d.resist?.[k])) out[k] = d.resist[k] + CAP_BONUS[k];
+  }
+  return out;
+};
 const dungeons = dungeonsData.dungeons.map((d) => ({ ...d, capStats: capStatsOf(d) }));
 
 app.get('/api/dungeons', (req, res) => res.json(dungeons));
@@ -106,6 +113,7 @@ app.post('/api/advise', handle(async (req, res) => {
   const minStats = { ...base.minStats };
   if (goal.critCap && base.capStats.crit) minStats.crit = base.capStats.crit;
   if (goal.balCap && base.capStats.bal) minStats.bal = base.capStats.bal;
+  if (goal.atkCap && base.capStats.atk) minStats.atk = base.capStats.atk;
   const dungeon = { ...base, minStats };
   if (!stats || typeof stats !== 'object') return res.status(400).json({ error: '스탯이 없습니다.' });
 
@@ -138,7 +146,7 @@ app.post('/api/advise', handle(async (req, res) => {
     const on = fullCatalog.filter((a) => a.slot === slot && !off.has(a.id));
     if (on.length > cap) warnings.push(`${slot === 'ring' ? '반지' : slot}는 ${cap}개까지 착용 가능한데 ${on.length}개가 계산에 들어가 있습니다: ${on.map((a) => a.target).join(', ')}`);
   }
-  res.json({ ...result, prices, warnings, goal: { critCap: !!goal.critCap, balCap: !!goal.balCap }, entryStats: base.minStats, mock: nexon.cfg.mock });
+  res.json({ ...result, prices, warnings, goal: { critCap: !!goal.critCap, balCap: !!goal.balCap, atkCap: !!goal.atkCap }, entryStats: base.minStats, mock: nexon.cfg.mock });
 }));
 
 const PORT = Number(process.env.PORT) || 3000;

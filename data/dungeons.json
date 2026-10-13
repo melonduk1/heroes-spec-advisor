@@ -11,7 +11,7 @@
       "armorPen": "방어력 관통",
       "destruction": "파괴력"
     },
-    "resistNote": "resist: 몬스터 크리티컬 저항(crit)·밸런스 저항(bal). 만크 = crit + 50, 만밸 = bal + 100. null이면 아직 모름."
+    "capsNote": "caps: 던전 상한(공상 atk = 2차 변곡점, 만크 crit, 만밸 bal, 크저 상한 critResist). mhon.kr 상한계산기 결과에서 역산(표시값 − 초과분). 없으면 resist(몬스터 저항)로 만크 = crit+50, 만밸 = bal+100."
   },
   "dungeons": [
     {
@@ -42,9 +42,13 @@
         "하루 1회 성공 제한, 피로도 16%"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1235",
-      "resist": {
-        "crit": null,
-        "bal": null
+      "caps": {
+        "atk": 78120,
+        "crit": 378,
+        "bal": 211,
+        "critResist": 424,
+        "source": "https://www.mhon.kr/raid",
+        "checked": "2026-10-13"
       }
     },
     {
@@ -75,10 +79,7 @@
         "하루 1회 성공 제한, 피로도 16%"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1212",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     },
     {
       "id": "forest-of-plenty",
@@ -108,10 +109,7 @@
         "하루 1회 성공 제한, 피로도 16%"
       ],
       "source": "https://heroes.nexon.com/news/update/view?postno=1194",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     },
     {
       "id": "forgotten-cathedral",
@@ -141,10 +139,7 @@
         "하루 1회 성공 제한, 피로도 16%"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1181",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     },
     {
       "id": "special-dungeon",
@@ -174,10 +169,7 @@
         "주간 1회 성공 제한"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1181",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     },
     {
       "id": "unfollowable-prophecy",
@@ -206,10 +198,7 @@
         "출시 당시 '대항력 315' 조건 → 현재 '방어력 관통 315'"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1170",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     },
     {
       "id": "knights-battle",
@@ -238,10 +227,7 @@
         "12인, 하루 3회 성공 제한"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1181",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     },
     {
       "id": "red-moon-hero",
@@ -265,10 +251,7 @@
         "일반/히어로 출정 횟수 공유, 하루 1회"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1181",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     },
     {
       "id": "red-moon-normal",
@@ -292,10 +275,7 @@
         "일반/히어로 출정 횟수 공유, 하루 1회"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1181",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     },
     {
       "id": "usurper-throne",
@@ -327,10 +307,7 @@
         "시공간 왜곡 전체 주간 3회 공유"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1199",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     },
     {
       "id": "usurper-fortress",
@@ -357,10 +334,7 @@
         "순수 능력치로 판정"
       ],
       "source": "https://heroes.nexon.com/news/update/View?postno=1199",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     },
     {
       "id": "watcher-temple",
@@ -388,10 +362,7 @@
         "시공간 왜곡 전체 주간 3회 공유"
       ],
       "source": "https://heroes.nexon.com/news/update/view?postno=1142",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     },
     {
       "id": "fallen-knight-hall",
@@ -419,10 +390,7 @@
         "시공간 왜곡 전체 주간 3회 공유"
       ],
       "source": "https://heroes.nexon.com/news/update/view?postno=1074",
-      "resist": {
-        "crit": null,
-        "bal": null
-      }
+      "caps": null
     }
   ]
 }
