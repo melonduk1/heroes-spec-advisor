@@ -36,10 +36,11 @@ app.get('/api/meta', (req, res) => {
   });
 });
 
-// 만크리 = 던전 크리티컬 요구치 + 50, 만밸런스 = 밸런스 요구치 + 100
+// 만크리 = 몬스터 크리티컬 저항 + 50, 만밸런스 = 몬스터 밸런스 저항 + 100
+// 저항 수치는 data/dungeons.json 의 resist { crit, bal } — 값이 없는 던전은 표시하지 않는다
 const CAP_BONUS = { crit: 50, bal: 100 };
 const capStatsOf = (d) => Object.fromEntries(Object.entries(CAP_BONUS)
-  .filter(([k]) => d.minStats[k] !== undefined).map(([k, b]) => [k, d.minStats[k] + b]));
+  .filter(([k]) => Number.isFinite(d.resist?.[k])).map(([k, b]) => [k, d.resist[k] + b]));
 const dungeons = dungeonsData.dungeons.map((d) => ({ ...d, capStats: capStatsOf(d) }));
 
 app.get('/api/dungeons', (req, res) => res.json(dungeons));

@@ -196,13 +196,20 @@ test('오르나·와드네 장비: 착용 부위만 켜지고 진행도·경로�
   assert.ok(orna.missing.some((n) => n.includes('직접 입력')));
 });
 
-test('만크리·만밸런스: 크리 +50, 밸런스 +100을 목표로 계산한다', async () => {
+test('만크리·만밸런스: 크리 저항 +50, 밸런스 저항 +100을 목표로 계산한다', async () => {
+  const data = require('../data/dungeons.json');
+  const target = data.dungeons.find((x) => x.minStats.crit && x.minStats.bal);
+  const saved = target.resist;
+  target.resist = { crit: target.minStats.crit, bal: target.minStats.bal }; // 테스트용 값
+  delete require.cache[require.resolve('../server')];
   const app = require('../server');
+  target.resist = saved;
   const srv = app.listen(0);
   const port = srv.address().port;
   try {
     const ds = await (await fetch(`http://localhost:${port}/api/dungeons`)).json();
-    const d = ds.find((x) => x.minStats.crit && x.minStats.bal);
+    const d = ds.find((x) => x.id === target.id);
+    assert.ok(ds.filter((x) => x.id !== target.id).every((x) => !x.capStats.crit), '저항 값이 없는 던전은 만크를 표시하지 않는다');
     assert.equal(d.capStats.crit, d.minStats.crit + 50);
     assert.equal(d.capStats.bal, d.minStats.bal + 100);
     const stats = { ...d.minStats };

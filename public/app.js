@@ -342,12 +342,12 @@ function renderResult(r, d) {
   const goalNames = [r.goal?.critCap && '만크리', r.goal?.balCap && '만밸런스'].filter(Boolean);
   const goalTxt = goalNames.length ? `입장 조건 + ${goalNames.join('·')}` : '입장 조건';
   $('#resultTitle').textContent = `${d.name}: ${diag.pass ? `${goalTxt}을 모두 채웠어요` : '부족한 스탯'}`;
-  $('#resultSub').innerHTML = `
-    <span class="goal-pick">목표:
-      <label><input type="checkbox" data-goal="critCap" ${S.goal.critCap ? 'checked' : ''}> 만크리 (크리티컬 ${fmt(d.capStats?.crit)})</label>
-      <label><input type="checkbox" data-goal="balCap" ${S.goal.balCap ? 'checked' : ''}> 만밸런스 (밸런스 ${fmt(d.capStats?.bal)})</label>
-    </span><br>
-    빠른 전투 최소 입장 능력치 기준${goalNames.length ? `에 ${goalNames.join('·')}(크리티컬 요구치 +50, 밸런스 요구치 +100)를 더한 목표` : ''}${d.pureStatsOnly ? ' (순수 능력치 판정)' : ''}. <a href="${esc(d.source)}" target="_blank" rel="noopener">출처 패치노트</a>`;
+  const capOpts = [
+    d.capStats?.crit ? `<label><input type="checkbox" data-goal="critCap" ${S.goal.critCap ? 'checked' : ''}> 만크리 (크리티컬 ${fmt(d.capStats.crit)})</label>` : '',
+    d.capStats?.bal ? `<label><input type="checkbox" data-goal="balCap" ${S.goal.balCap ? 'checked' : ''}> 만밸런스 (밸런스 ${fmt(d.capStats.bal)})</label>` : '',
+  ].join('');
+  $('#resultSub').innerHTML = `${capOpts ? `<span class="goal-pick">목표: ${capOpts}</span><br>` : ''}
+    빠른 전투 최소 입장 능력치 기준${goalNames.length ? `에 ${goalNames.join('·')}(크리티컬 저항 +50, 밸런스 저항 +100)를 더한 목표` : ''}${d.pureStatsOnly ? ' (순수 능력치 판정)' : ''}. <a href="${esc(d.source)}" target="_blank" rel="noopener">출처 패치노트</a>`;
   $('#resultSub').querySelectorAll('[data-goal]').forEach((cb) => cb.addEventListener('change', () => {
     S.goal = { ...S.goal, [cb.dataset.goal]: cb.checked };
     store.set('hs.goal', S.goal);

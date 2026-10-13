@@ -10,7 +10,8 @@
       "addDmg": "추가피해",
       "armorPen": "방어력 관통",
       "destruction": "파괴력"
-    }
+    },
+    "resistNote": "resist: 몬스터 크리티컬 저항(crit)·밸런스 저항(bal). 만크 = crit + 50, 만밸 = bal + 100. null이면 아직 모름."
   },
   "dungeons": [
     {
@@ -40,7 +41,11 @@
         "추가피해 상한 없음",
         "하루 1회 성공 제한, 피로도 16%"
       ],
-      "source": "https://heroes.nexon.com/news/update/View?postno=1235"
+      "source": "https://heroes.nexon.com/news/update/View?postno=1235",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "heaven-earth-meet",
@@ -69,7 +74,11 @@
         "추가피해 상한 없음",
         "하루 1회 성공 제한, 피로도 16%"
       ],
-      "source": "https://heroes.nexon.com/news/update/View?postno=1212"
+      "source": "https://heroes.nexon.com/news/update/View?postno=1212",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "forest-of-plenty",
@@ -98,7 +107,11 @@
         "추가피해 상한 없음",
         "하루 1회 성공 제한, 피로도 16%"
       ],
-      "source": "https://heroes.nexon.com/news/update/view?postno=1194"
+      "source": "https://heroes.nexon.com/news/update/view?postno=1194",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "forgotten-cathedral",
@@ -127,7 +140,11 @@
         "출시 당시 '대항력 330' 조건 → 현재 '방어력 관통 330'",
         "하루 1회 성공 제한, 피로도 16%"
       ],
-      "source": "https://heroes.nexon.com/news/update/View?postno=1181"
+      "source": "https://heroes.nexon.com/news/update/View?postno=1181",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "special-dungeon",
@@ -156,7 +173,11 @@
         "새 레이드가 나올 때마다 2종 교체, 입장 조건은 동일 유지",
         "주간 1회 성공 제한"
       ],
-      "source": "https://heroes.nexon.com/news/update/View?postno=1181"
+      "source": "https://heroes.nexon.com/news/update/View?postno=1181",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "unfollowable-prophecy",
@@ -184,7 +205,11 @@
       "notes": [
         "출시 당시 '대항력 315' 조건 → 현재 '방어력 관통 315'"
       ],
-      "source": "https://heroes.nexon.com/news/update/View?postno=1170"
+      "source": "https://heroes.nexon.com/news/update/View?postno=1170",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "knights-battle",
@@ -212,7 +237,11 @@
       "notes": [
         "12인, 하루 3회 성공 제한"
       ],
-      "source": "https://heroes.nexon.com/news/update/View?postno=1181"
+      "source": "https://heroes.nexon.com/news/update/View?postno=1181",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "red-moon-hero",
@@ -235,7 +264,11 @@
       "notes": [
         "일반/히어로 출정 횟수 공유, 하루 1회"
       ],
-      "source": "https://heroes.nexon.com/news/update/View?postno=1181"
+      "source": "https://heroes.nexon.com/news/update/View?postno=1181",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "red-moon-normal",
@@ -258,7 +291,11 @@
       "notes": [
         "일반/히어로 출정 횟수 공유, 하루 1회"
       ],
-      "source": "https://heroes.nexon.com/news/update/View?postno=1181"
+      "source": "https://heroes.nexon.com/news/update/View?postno=1181",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "usurper-throne",
@@ -289,7 +326,11 @@
         "모든 상태 효과·파르홀른 원정단 효과를 뺀 '순수 능력치'로 판정",
         "시공간 왜곡 전체 주간 3회 공유"
       ],
-      "source": "https://heroes.nexon.com/news/update/View?postno=1199"
+      "source": "https://heroes.nexon.com/news/update/View?postno=1199",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "usurper-fortress",
@@ -315,7 +356,11 @@
         "2025-11-20 파괴력 조건 4,500 → 2,000으로 완화",
         "순수 능력치로 판정"
       ],
-      "source": "https://heroes.nexon.com/news/update/View?postno=1199"
+      "source": "https://heroes.nexon.com/news/update/View?postno=1199",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "watcher-temple",
@@ -342,7 +387,11 @@
         "모든 상태 효과·파르홀른 원정단 효과를 뺀 '순수 능력치'로 판정",
         "시공간 왜곡 전체 주간 3회 공유"
       ],
-      "source": "https://heroes.nexon.com/news/update/view?postno=1142"
+      "source": "https://heroes.nexon.com/news/update/view?postno=1142",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     },
     {
       "id": "fallen-knight-hall",
@@ -369,7 +418,11 @@
         "모든 상태 효과·파르홀른 원정단 효과를 뺀 '순수 능력치'로 판정",
         "시공간 왜곡 전체 주간 3회 공유"
       ],
-      "source": "https://heroes.nexon.com/news/update/view?postno=1074"
+      "source": "https://heroes.nexon.com/news/update/view?postno=1074",
+      "resist": {
+        "crit": null,
+        "bal": null
+      }
     }
   ]
 }
