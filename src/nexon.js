@@ -91,27 +91,41 @@ function median(xs) {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
+// 거래소가 권한 없음(403)이나 호출 한도 초과(429)를 주면 나머지 재료는 호출하지 않고
+// 한동안 실패 상태를 기억한다. 그래야 페이지를 열 때마다 수십 번씩 호출하다
+// 캐릭터 조회까지 한도에 걸리는 일이 없다.
+let auctionBlockedUntil = 0;
+let auctionBlockedReason = null;
+
 async function getPrice(itemName) {
   if (cfg.mock) {
     const prices = readMock('prices.json').prices;
     return { item: itemName, unit: prices[itemName] ?? null, samples: prices[itemName] ? 1 : 0, mock: true };
   }
+  if (Date.now() < auctionBlockedUntil) return { item: itemName, unit: null, samples: 0, error: auctionBlockedReason, mock: false };
   return cached(`price:${itemName}`, 10 * 60 * 1000, async () => {
     try {
       const body = await call(cfg.pathAuction, { [cfg.auctionItemParam]: itemName });
       const xs = unitPricesFrom(body);
       return { item: itemName, unit: median(xs), samples: xs.length, mock: false };
     } catch (e) {
-      return { item: itemName, unit: null, samples: 0, error: e.message, mock: false };
+      if (e.status === 403 || e.status === 429) {
+        auctionBlockedUntil = Date.now() + (e.status === 403 ? 60 : 2) * 60 * 1000;
+        auctionBlockedReason = e.status === 403
+          ? '거래소 API 권한 없음 (OPENAPI00002)'
+          : 'API 호출 한도 초과 (OPENAPI00007), 잠시 뒤 다시 시도';
+        cache.delete(`price:${itemName}`);
+      }
+      return { item: itemName, unit: null, samples: 0, error: auctionBlockedReason || e.message, mock: false };
     }
   });
 }
 
 async function getPrices(names) {
   const out = {};
-  // 호출 제한을 고려해 동시 4개씩
+  // 호출 제한을 고려해 2개씩, 막히면 바로 멈춤
   const queue = [...names];
-  const workers = Array.from({ length: 4 }, async () => {
+  const workers = Array.from({ length: 2 }, async () => {
     while (queue.length) {
       const n = queue.shift();
       out[n] = await getPrice(n);
@@ -132,31 +146,6 @@ async function getAuctionRaw(itemName) {
   return out;
 }
 
-// 거래소 경로 후보를 한 번씩 호출해 오류 코드를 비교한다 (어느 경로가 실제로 있는지 확인용)
-// OPENAPI00006 = 없는 경로, OPENAPI00002 = 경로는 있지만 권한 없음, OPENAPI00004 = 파라미터 문제
-async function probeAuction(itemName) {
-  if (cfg.mock) return { mock: true };
-  const bases = [cfg.base, cfg.base.replace(/\/v2$/, '/v1')];
-  const paths = ['/auction/history', '/auction/list', '/auction/keyword-search', '/auction/item-history', '/auction', '/market/history'];
-  const params = [{ item_name: itemName }, { keyword: itemName }];
-  const out = [];
-  for (const b of [...new Set(bases)]) for (const p of paths) for (const q of params) {
-    const url = new URL(b + p);
-    for (const [k, v] of Object.entries(q)) url.searchParams.set(k, v);
-    try {
-      const res = await fetch(url, { headers: { 'x-nxopen-api-key': cfg.key } });
-      const body = await res.json().catch(() => ({}));
-      out.push({ url: url.pathname + url.search, status: res.status, code: body?.error?.name || null, message: body?.error?.message || null, keys: res.ok ? Object.keys(body) : undefined, sample: res.ok ? JSON.stringify(body).slice(0, 600) : undefined });
-    } catch (e) { out.push({ url: url.pathname, error: e.message }); }
-  }
-  // 비교용: 확인된 경로(/id)
-  try {
-    const res = await fetch(new URL(cfg.base + cfg.pathOcid + '?character_name=' + encodeURIComponent('츠라이')), { headers: { 'x-nxopen-api-key': cfg.key } });
-    out.push({ url: 'control ' + cfg.pathOcid, status: res.status });
-  } catch {}
-  return out;
-}
-
 // 장비(인챈트·강화·연마) 원본 응답 — 스키마 확인용
 async function getEquipmentRaw(name) {
   if (cfg.mock) return { mock: true, note: '목업 모드에서는 장비 정보를 불러오지 않습니다. NEXON_API_KEY를 넣고 다시 실행하세요.' };
@@ -166,4 +155,4 @@ async function getEquipmentRaw(name) {
   return out;
 }
 
-module.exports = { cfg, getCharacter, getEquipmentRaw, getAuctionRaw, probeAuction, getPrices, unitPricesFrom, median };
+module.exports = { cfg, getCharacter, getEquipmentRaw, getAuctionRaw, getPrices, unitPricesFrom, median };
