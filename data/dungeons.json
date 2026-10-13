@@ -390,7 +390,14 @@
         "시공간 왜곡 전체 주간 3회 공유"
       ],
       "source": "https://heroes.nexon.com/news/update/view?postno=1142",
-      "caps": null
+      "caps": {
+        "atk": 67000,
+        "crit": 355,
+        "bal": 200,
+        "critResist": 362,
+        "source": "https://www.mhon.kr/raid",
+        "checked": "2026-10-13"
+      }
     },
     {
       "id": "fallen-knight-hall",
