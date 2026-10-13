@@ -5,7 +5,7 @@
 //
 // 출처
 //   정령 합성 확률: https://heroes.nexon.com/Common/NoticePopup?no=27
-//   인챈트 수치: 각 레이드 패치노트, 나무위키 '마비노기 영웅전/인챈트/접두'·'접미', 게임 내 툴팁(대적자의·신비)
+//   인챈트 수치: data/enchants.json (나무위키 '마비노기 영웅전/인챈트/접두'·'접미', 게임 내 툴팁)
 //   팔찌: https://heroes.nexon.com/news/update/View?postno=1199
 
 const SRC_SPIRIT = 'https://heroes.nexon.com/Common/NoticePopup?no=27';
@@ -59,57 +59,12 @@ function spiritActions(items) {
 // ───────── 인챈트 ─────────
 // 인챈트의 '크리티컬 N%'·'밸런스 N%'는 실제로는 크리티컬/밸런스 +N (고정 수치).
 // 크리티컬 저항·공격속도·생명력·스태미나는 입장 조건이 아니라 계산에서 제외.
+// data/enchants.json: 접두·접미 인챈트 전체 수치 (atk/def/crit/bal/addDmg만)
+const ENCHANT_DATA = require('../data/enchants.json');
+const pick = ({ atk, def, crit, bal, addDmg }) => Object.fromEntries(Object.entries({ atk, def, crit, bal, addDmg }).filter(([, v]) => v !== undefined));
 const ENCHANTS = {
-  prefix: {
-    '비극의': { atk: 700, crit: 8, bal: 4 },
-    '잔혹한': { atk: 430, crit: 4, bal: 2 },
-    '가득한': { atk: 245, def: 200, crit: 3, bal: 6 },
-    '냉철의': { atk: 245, def: 200, crit: 3, bal: 3 },
-    '영원한': { def: 160, crit: 9, bal: -3 },
-    '고결한': { def: 160, crit: 6, bal: -3 },
-    '물드는': { atk: 145, def: 300, crit: 6, bal: 7 },
-    '공허한': { def: 1000, crit: 4 },
-    '헤매는': { bal: 12 },
-    '대적자의': { bal: 9 }, // 반지 접두 4랭크 (크리티컬 저항 5, 생명력 -450은 계산 제외)
-    '메마른': { crit: 6, bal: 4 },
-    '초월의': { atk: 600, crit: 2, bal: 2, addDmg: 150 },
-    '처단하는': { atk: 700, crit: 2, bal: 2, addDmg: 50 },
-    '고조되는': { atk: 700, crit: 2, bal: 2, addDmg: 50 },
-    '순환의': { atk: 700, crit: 2, bal: 2, addDmg: 50 },
-    '증폭된': { atk: 700, crit: 2, bal: 2, addDmg: 50 },
-    '불굴의': { atk: 700, crit: 2, bal: 2, addDmg: 50 },
-    '감춰진': { atk: 700 },
-    '질풍의': { atk: 700, crit: -4, bal: -4 },
-  },
-  suffix: {
-    '강림': { atk: 450, crit: 2, bal: 2 },
-    '운명': { atk: 400, crit: 4, bal: 4 },
-    '신비': { atk: 200, crit: 2, bal: 2 }, // 반지·벨트 접미 5랭크
-    '격노': { def: 400 }, // 액세서리 접미 5랭크 (스태미나·크리티컬 저항은 계산 제외)
-    '소망': { def: 300 },          // 액세서리 접미 6랭크
-    '사념': { def: 500, bal: 1 },  // 액세서리 접미 4랭크
-    '물결': { atk: 300 },          // 액세서리 접미 4랭크 (스태미나 회복 효과)
-    // 무기 접미
-    '일격': { atk: 1030, crit: 10, bal: -1 },
-    '원한': { atk: 1000, crit: 7, bal: -1 },
-    '신념': { atk: 970, crit: 5, bal: -1 },
-    // 머리·다리 접미
-    '투혼': { atk: 285, def: 280, crit: 8 },
-    '진격': { atk: 285, def: 280, crit: 5 },
-    '포획': { atk: 285, def: 280, crit: 3 },
-    '원정': { atk: 285, def: 280, crit: 1 },
-    // 가슴 접미
-    '한탄': { def: 120, crit: 9, bal: -1 },
-    '결계': { def: 120, crit: 7, bal: -1 },
-    '낙인': { def: 70, crit: 6, bal: -1 },
-    '보호': { crit: 5, bal: -1 },
-    // 손·발 접미
-    '광분': { atk: 465, def: -300, bal: 7 },
-    '영혼': { atk: 465, def: -300, bal: 5 },
-    '메아리': { atk: 365, def: -260, bal: 4 },
-    '고독': { atk: 465, def: -300, bal: 10 },
-    '시련': { def: 120, crit: 12, bal: -1 },
-  },
+  prefix: Object.fromEntries(Object.entries(ENCHANT_DATA.prefix).map(([n, v]) => [n, pick(v)])),
+  suffix: Object.fromEntries(Object.entries(ENCHANT_DATA.suffix).map(([n, v]) => [n, pick(v)])),
 };
 
 // 슬롯별로 추천할 인챈트 (해당 부위에 붙는 것 중 고정 수치가 높은 것)
@@ -123,6 +78,9 @@ const ENCHANT_TARGETS = [
   { slots: ['Hand', 'Leg'], kind: 'prefix', to: '물드는', label: '손/발' },
   { slots: ['Hand', 'Leg'], kind: 'suffix', to: '고독', label: '손/발' },
   { slots: ['Left Hand'], kind: 'prefix', to: '공허한', label: '보조 장비' },
+  { slots: ['Left Hand'], kind: 'suffix', to: '찬미', label: '보조 장비' },
+  { slots: ['Rhod'], kind: 'prefix', to: '단호한', label: '로드' },
+  { slots: ['Earring', 'Necklace'], kind: 'prefix', to: '감춰진', label: '귀걸이/목걸이' },
   { slots: ['Right Finger', 'Left Finger'], kind: 'prefix', to: '헤매는', label: '반지' },
   { slots: ['Right Finger', 'Left Finger', 'Belt'], kind: 'suffix', to: '운명', label: '반지/벨트' },
   { slots: ['Belt'], kind: 'prefix', to: '메마른', label: '벨트' },

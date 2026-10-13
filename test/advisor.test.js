@@ -127,3 +127,14 @@ test('정령석·인챈트 교체·팔찌: 실제 장비에서 생성, 스탯 �
   assert.equal(r2.plan.length, 1);
   assert.equal(r2.unresolved.length, 0);
 });
+
+test('인챈트 데이터: 주요 수치', () => {
+  const { ENCHANTS } = require('../src/dynamic');
+  assert.deepEqual(ENCHANTS.prefix['비극의'], { atk: 700, crit: 8, bal: 4 });
+  assert.deepEqual(ENCHANTS.prefix['물드는'], { atk: 145, def: 300, crit: 6, bal: 7 });
+  assert.deepEqual(ENCHANTS.suffix['일격'], { atk: 1030, crit: 10, bal: -1 });
+  assert.deepEqual(ENCHANTS.suffix['사념'], { def: 500, bal: 1 });
+  assert.deepEqual(ENCHANTS.suffix['물결'], { atk: 300 });
+  assert.deepEqual(ENCHANTS.suffix['격노'], { def: 400 });
+  assert.ok(Object.keys(ENCHANTS.prefix).length > 70 && Object.keys(ENCHANTS.suffix).length > 50);
+});
