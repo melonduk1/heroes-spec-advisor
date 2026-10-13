@@ -104,3 +104,26 @@ test('거래소 응답 → 최근 평균가 (실제 응답 샘플)', () => {
   assert.equal(priceFromMarket(body, '없는 아이템'), null);
   assert.equal(priceFromMarket({ item: [] }, 'x'), null);
 });
+
+test('정령석·인챈트 교체·팔찌: 실제 장비에서 생성, 스탯 손실 규칙', () => {
+  const { parseEquipment } = require('../src/equipment');
+  const { buildDynamicActions } = require('../src/dynamic');
+  const eq = parseEquipment(require('./fixtures/equipment-sample.json'), buildCatalog());
+  const dyn = buildDynamicActions(eq.items);
+  const ring = dyn.find((a) => a.id === 'spirit-crit-RightFinger');   // 밸런스 +2 → 크리 +2
+  assert.deepEqual(ring.steps[0].gain, { crit: 2, bal: -2 });
+  assert.ok(!dyn.some((a) => a.id === 'spirit-crit-RightHand'));     // 무기는 이미 크리 +2
+  const brace = dyn.find((a) => a.id === 'bracelet-LeftWrist');       // 녹슨 → 완전
+  assert.deepEqual(brace.steps[0].gain, { atk: 500, crit: 4, destruction: 400 });
+  assert.ok(!dyn.some((a) => a.id === 'enchant-swap-prefix-RightHand')); // 이미 비극의
+
+  // 크리·밸런스 둘 다 부족하면 밸런스를 깎는 정령석은 고르지 않는다
+  const d = dungeons.find((x) => x.id === 'watcher-temple');
+  const stats = { ...d.minStats, crit: d.minStats.crit - 2, bal: d.minStats.bal - 2 };
+  const r = advise({ stats, dungeon: d, catalog: [ring], prices: { '고급 정령석': 1 } });
+  assert.equal(r.plan.length, 0);
+  // 밸런스 여유가 충분하면 고른다
+  const r2 = advise({ stats: { ...d.minStats, crit: d.minStats.crit - 2, bal: d.minStats.bal + 5 }, dungeon: d, catalog: [ring], prices: { '고급 정령석': 1 } });
+  assert.equal(r2.plan.length, 1);
+  assert.equal(r2.unresolved.length, 0);
+});

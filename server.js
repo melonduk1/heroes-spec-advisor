@@ -11,13 +11,14 @@ const { advise, itemsInCatalog } = require('./src/advisor');
 const { extractStats, STAT_KEYS } = require('./src/stats');
 const nexon = require('./src/nexon');
 const { parseEquipment } = require('./src/equipment');
+const { buildDynamicActions, DYNAMIC_ITEMS } = require('./src/dynamic');
 
 const app = express();
 app.use(express.json({ limit: '200kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const catalog = buildCatalog();
-const allItems = itemsInCatalog(catalog);
+const allItems = [...new Set([...itemsInCatalog(catalog), ...DYNAMIC_ITEMS])].sort();
 
 const handle = (fn) => (req, res) =>
   fn(req, res).catch((e) => {
@@ -50,7 +51,12 @@ app.get('/api/character', handle(async (req, res) => {
     stats,
     missing,
     mock: ch.mock,
-    equipment: ch.equipment ? parseEquipment(ch.equipment, catalog) : null,
+    equipment: (() => {
+      if (!ch.equipment) return null;
+      const eq = parseEquipment(ch.equipment, catalog);
+      eq.dynamicActions = buildDynamicActions(eq.items);
+      return eq;
+    })(),
     raw: req.query.raw ? { stat: ch.stat, equipment: ch.equipment } : undefined,
   });
 }));
@@ -80,7 +86,9 @@ app.get('/api/prices', handle(async (req, res) => {
 }));
 
 app.post('/api/advise', handle(async (req, res) => {
-  const { stats, dungeonId, progress, disabled, priceOverrides, opts } = req.body || {};
+  const { stats, dungeonId, progress, disabled, priceOverrides, opts, equipmentItems } = req.body || {};
+  // 장비에 따라 달라지는 방법(정령석·인챈트 교체·팔찌)을 이번 계산에만 더한다
+  const fullCatalog = [...catalog, ...buildDynamicActions(Array.isArray(equipmentItems) ? equipmentItems.slice(0, 40) : [])];
   const dungeon = dungeonsData.dungeons.find((d) => d.id === dungeonId);
   if (!dungeon) return res.status(400).json({ error: '던전을 선택하세요.' });
   if (!stats || typeof stats !== 'object') return res.status(400).json({ error: '스탯이 없습니다.' });
@@ -101,7 +109,7 @@ app.post('/api/advise', handle(async (req, res) => {
   const result = advise({
     stats: clean,
     dungeon,
-    catalog,
+    catalog: fullCatalog,
     prices,
     progress: progress || {},
     disabled: disabled || [],
@@ -111,7 +119,7 @@ app.post('/api/advise', handle(async (req, res) => {
   const off = new Set(disabled || []);
   const warnings = [];
   for (const [slot, cap] of Object.entries(SLOT_CAPACITY)) {
-    const on = catalog.filter((a) => a.slot === slot && !off.has(a.id));
+    const on = fullCatalog.filter((a) => a.slot === slot && !off.has(a.id));
     if (on.length > cap) warnings.push(`${slot === 'ring' ? '반지' : slot}는 ${cap}개까지 착용 가능한데 ${on.length}개가 계산에 들어가 있습니다: ${on.map((a) => a.target).join(', ')}`);
   }
   res.json({ ...result, prices, warnings, mock: nexon.cfg.mock });

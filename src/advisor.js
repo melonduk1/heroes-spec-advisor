@@ -75,10 +75,18 @@ function diagnose(stats, dungeon) {
 }
 
 // 단계 하나가 부족분을 얼마나 메우는지 (각 스탯 부족분 대비 비율의 합)
-function stepValue(gain, remaining, original) {
+// 단계 하나가 부족분을 얼마나 메우는지. 스탯이 줄어드는 단계(정령석 교체 등)는
+// 부족한 스탯을 깎거나 여유 있는 스탯을 요구치 아래로 떨어뜨리면 제외(-Infinity).
+function stepValue(gain, remaining, original, surplus = {}) {
   let v = 0;
   for (const [k, g] of Object.entries(gain)) {
-    if (!original[k] || remaining[k] <= 0 || g <= 0) continue;
+    if (g < 0) {
+      // 부족한 스탯을 더 깎거나, 충족한 스탯을 요구치 아래로 떨어뜨리는 단계는 고르지 않는다
+      if (original[k]) return -Infinity;
+      if (surplus[k] !== undefined && surplus[k] + g < 0) return -Infinity;
+      continue;
+    }
+    if (!original[k] || remaining[k] <= 0) continue;
     v += Math.min(g, remaining[k]) / original[k];
   }
   return v;
@@ -99,6 +107,9 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
   const original = {};
   for (const r of diag.rows) if (r.gap > 0) original[r.stat] = r.gap;
   const remaining = { ...original };
+  // 이미 충족한 스탯의 여유분 (줄어드는 단계가 이 아래로 떨어뜨리면 안 됨)
+  const surplus = {};
+  for (const r of diag.rows) if (r.ok) surplus[r.stat] = r.have - r.need;
 
   const state = {};
   for (const a of catalog) state[a.id] = Math.max(0, Number(progress[a.id]) || 0);
@@ -109,7 +120,7 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
     if (!step) return null;
     const attempts = expectedAttempts(step.rate, step.pity);
     const c = priceCost(step.cost, prices);
-    const value = stepValue(step.gain, remaining, original);
+    const value = stepValue(step.gain, remaining, original, surplus);
     return { step, attempts, cost: c.gold * attempts, missing: c.missing, value, breakdown: c.breakdown };
   };
 
@@ -125,6 +136,8 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
         actionId: a.id, name: a.name, group: a.group, stepLabel: e.step.label,
         gain: e.step.gain[k], costPerPoint: e.cost / e.step.gain[k], partial: e.missing.length > 0,
         missing: e.missing, attempts: e.attempts, risky: !!a.risky, requires: a.requires || null,
+        losses: Object.entries(e.step.gain).filter(([, g]) => g < 0).map(([stat, g]) => ({ stat, g })),
+        blockedByLoss: e.value === -Infinity,
       });
     }
     // 시세가 다 확인된 방법을 먼저, 그 안에서 싼 순서
@@ -162,7 +175,10 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
     best = best || bestPartial;
     if (!best) break;
     const { a, e, eff } = best;
-    for (const [k, g] of Object.entries(e.step.gain)) if (remaining[k] !== undefined) remaining[k] = Math.max(0, remaining[k] - g);
+    for (const [k, g] of Object.entries(e.step.gain)) {
+      if (remaining[k] !== undefined) remaining[k] = Math.max(0, remaining[k] - g);
+      else if (surplus[k] !== undefined) surplus[k] += g;
+    }
     steps.push({ actionId: a.id, name: a.name, group: a.group, target: a.target, stepLabel: e.step.label, gain: e.step.gain, cost: e.cost, attempts: e.attempts, eff, missing: e.missing, breakdown: e.breakdown, risky: !!a.risky, requires: a.requires || null, source: a.source });
     state[a.id] += 1;
   }

@@ -51,6 +51,15 @@ function tuning(opt) {
   return t;
 }
 
+// 정령 합성으로 붙은 능력치 (power_infusion_preset_N) 중 사용 중인 프리셋
+function activeInfusion(opt) {
+  if (!opt) return null;
+  const no = opt.power_infusion_use_preset_no || 1;
+  const p = opt[`power_infusion_preset_${no}`];
+  if (!p || !p.stat_name) return null;
+  return { name: p.stat_name, value: num(p.stat_value) };
+}
+
 function activeEnchants(opt) {
   if (!opt) return { prefix: null, suffix: null };
   const pick = (kind) => {
@@ -147,6 +156,7 @@ function parseEquipment(raw, catalog) {
       prefix: e.prefix,
       suffix: e.suffix,
       tuning: tuning(i.item_option),
+      infusion: activeInfusion(i.item_option),
     };
   });
 

@@ -19,6 +19,9 @@ const S = {
   meta: null,
   dungeons: [],
   catalog: [],
+  baseCatalog: [],
+  equipItems: store.get('hs.equipItems', []),
+  dynamic: store.get('hs.dynamic', []),
   stats: store.get('hs.stats', {}),
   apiStats: {},
   progress: store.get('hs.progress', {}),
@@ -101,15 +104,25 @@ function applyEquipment(eq) {
     // 이전 캐릭터의 진행 상황이 남아 계산을 막지 않도록 비운다
     S.progress = {};
     store.set('hs.progress', S.progress);
+    S.equipItems = []; S.dynamic = [];
+    store.set('hs.equipItems', []); store.set('hs.dynamic', []);
+    S.catalog = [...S.baseCatalog];
     renderGear();
     box.innerHTML = '<p class="hint">장비 정보를 불러오지 못해 장비 진행 상황은 직접 입력해야 해요.</p>';
     return;
   }
   // 새 캐릭터를 불러오면 진행 상황을 그 캐릭터 장비 기준으로 통째로 바꾼다
   S.progress = { ...eq.progress };
+  // 장비에 따라 달라지는 방법 (정령석·인챈트 교체·팔찌)
+  S.equipItems = eq.items;
+  S.dynamic = eq.dynamicActions || [];
+  store.set('hs.equipItems', S.equipItems);
+  store.set('hs.dynamic', S.dynamic);
+  S.catalog = [...S.baseCatalog, ...S.dynamic];
   store.set('hs.progress', S.progress);
   const off = new Set(S.disabled);
   for (const [id, on] of Object.entries(eq.enable)) { if (on) off.delete(id); else off.add(id); }
+  for (const a of S.dynamic) { if (a.defaultOff) off.add(a.id); else off.delete(a.id); }
   S.disabled = [...off];
   store.set('hs.disabled', S.disabled);
   renderGear();
@@ -205,6 +218,8 @@ function gearRow(a) {
   let ctrl = '';
   if (a.type === 'repeat') {
     ctrl = `<span><input type="number" min="0" max="${a.maxSteps}" value="${p}" data-prog="${a.id}" aria-label="${esc(a.name)} 진행 횟수"> <span class="max">/ ${a.maxSteps}회</span></span>`;
+  } else if (a.type === 'sequence' && a.dynamic) {
+    ctrl = `<select data-prog="${a.id}" aria-label="${esc(a.name)} 완료 여부"><option value="0" ${p ? '' : 'selected'}>아직</option><option value="1" ${p ? 'selected' : ''}>했음</option></select>`;
   } else if (a.type === 'sequence') {
     const labels = a.gradeNames
       ? a.gradeNames.map((g, i) => [i, g])
@@ -267,7 +282,7 @@ async function runAdvise() {
     const r = await api('/api/advise', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ stats: S.stats, dungeonId: d.id, progress: S.progress, disabled: S.disabled, priceOverrides: S.overrides, opts: { luckyMultiplier: S.lucky } }),
+      body: JSON.stringify({ stats: S.stats, dungeonId: d.id, progress: S.progress, disabled: S.disabled, priceOverrides: S.overrides, opts: { luckyMultiplier: S.lucky }, equipmentItems: S.equipItems }),
     });
     S.lastResult = r;
     renderResult(r, d);
@@ -278,8 +293,10 @@ async function runAdvise() {
 }
 
 function gainText(gain) {
-  return Object.entries(gain).filter(([, v]) => v > 0)
-    .map(([k, v]) => `${S.meta.statLabels[k].replace(/\(.*\)/, '')} +${fmt(v)}`).join(', ');
+  const label = (k) => S.meta.statLabels[k].replace(/\(.*\)/, '');
+  return Object.entries(gain).filter(([, v]) => v)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => (v > 0 ? `${label(k)} +${fmt(v)}` : `${label(k)} −${fmt(-v)}`)).join(', ');
 }
 
 function renderResult(r, d) {
@@ -351,7 +368,7 @@ function renderResult(r, d) {
     </tr>` : `<tr>
       <td><span class="aname">${esc(x.name)}</span>${x.risky ? ' <span class="tag risk">확률 미반영</span>' : ''}${x.requires ? `<div class="muted">${esc(x.requires)}</div>` : ''}</td>
       <td>${esc(x.stepLabel)}${x.attempts > 1.001 ? `<div class="muted">기대 ${x.attempts.toFixed(2)}회 시도</div>` : ''}</td>
-      <td class="num">+${fmt(x.gain)}</td>
+      <td class="num">+${fmt(x.gain)}${x.losses?.length ? `<div class="muted">${esc(x.losses.map((l) => `${S.meta.statLabels[l.stat].replace(/\(.*\)/, '')} −${fmt(-l.g)}`).join(', '))} 함께 감소</div>` : ''}${x.blockedByLoss ? '<div class="muted">줄어드는 스탯이 이미 부족하거나 요구치 아래로 떨어져서 추천에서 제외</div>' : ''}</td>
       <td class="num"><span class="gold">${fmtGold(x.costPerPoint)}</span>${x.partial ? `<div class="muted">+ 시세 없는 재료 ${x.missing.length}종</div>` : ''}</td>
     </tr>`).join('') || '<tr><td colspan="4" class="muted">이 계산기에는 이 스탯을 올리는 방법이 없어요. 정령석·팔찌 보석·타이틀처럼 아직 계산에 없는 수단으로 올려야 합니다.</td></tr>'}</tbody>` : '';
   $('#perStatTabs').hidden = !keys.length;
@@ -412,7 +429,8 @@ function planRow(p, i) {
     const [meta, dungeons, catalog] = await Promise.all([api('/api/meta'), api('/api/dungeons'), api('/api/catalog')]);
     S.meta = meta;
     S.dungeons = dungeons;
-    S.catalog = catalog;
+    S.baseCatalog = catalog;
+    S.catalog = [...catalog, ...S.dynamic];
     S.disabled = store.get('hs.disabled', catalog.filter((a) => a.defaultOff).map((a) => a.id));
     $('#mockBanner').hidden = !meta.mock;
     $('#dataDate').textContent = meta.dungeonsUpdated;
