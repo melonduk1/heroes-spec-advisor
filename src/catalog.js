@@ -252,7 +252,7 @@ function armorUpgrades() {
 
 // ───────────── 인챈트 (once) ─────────────
 // 성공 확률과 실패 시 장비 파괴 위험은 이 계산에 들어가지 않는다 → risky 표시.
-// 크리티컬 '%'처럼 단위가 애매한 옵션은 상승량에서 뺐다.
+// 인챈트의 '크리티컬 N%'는 실제로 크리티컬 +N 고정 수치다.
 function enchantActions() {
   const e = (id, name, target, gain, src, extra = '') => ({
     id: `enchant-${id}`, type: 'once', group: '인챈트', target, name,
@@ -261,13 +261,13 @@ function enchantActions() {
     source: src,
   });
   return [
-    e('tragic', '비극의 인챈트 스크롤', '무기 (접두 3랭크)', { atk: 700, bal: 4 }, SRC.ep12, ' 공격속도 +8, 크리티컬 8% 별도.'),
-    e('full', '가득한 인챈트 스크롤', '머리/다리 방어구 (접두 3랭크)', { atk: 245, def: 200, bal: 6 }, SRC.ep13, ' 크리티컬 3% 별도.'),
-    e('dyed', '물드는 인챈트 스크롤', '손/발 방어구 (접두 3랭크)', { atk: 145, def: 300, bal: 7 }, SRC.ep15, ' 크리티컬 6% 별도.'),
+    e('tragic', '비극의 인챈트 스크롤', '무기 (접두 3랭크)', { atk: 700, crit: 8, bal: 4 }, SRC.ep12, ' 공격속도 +8 별도.'),
+    e('full', '가득한 인챈트 스크롤', '머리/다리 방어구 (접두 3랭크)', { atk: 245, def: 200, crit: 3, bal: 6 }, SRC.ep13),
+    e('dyed', '물드는 인챈트 스크롤', '손/발 방어구 (접두 3랭크)', { atk: 145, def: 300, crit: 6, bal: 7 }, SRC.ep15),
     e('wander', '헤매는 인챈트 스크롤', '반지 (접두 3랭크)', { bal: 12 }, SRC.ep15, ' 생명력 -450.'),
-    e('dry', '메마른 인챈트 스크롤', '벨트 (접두 3랭크)', { bal: 4 }, SRC.ep14, ' 크리티컬 6% 별도.'),
-    e('transcend', '초월의 인챈트 스크롤', '브로치 (접두 4랭크)', { atk: 600, bal: 2, addDmg: 150 }, SRC.throne, ' 크리티컬 2% 별도.'),
-    e('advent', '강림 인챈트 스크롤', '아티팩트 (접미 4랭크)', { atk: 450, bal: 2 }, SRC.throne, ' 크리티컬 2% 별도.'),
+    e('dry', '메마른 인챈트 스크롤', '벨트 (접두 3랭크)', { crit: 6, bal: 4 }, SRC.ep14),
+    e('transcend', '초월의 인챈트 스크롤', '브로치 (접두 4랭크)', { atk: 600, crit: 2, bal: 2, addDmg: 150 }, SRC.throne),
+    e('advent', '강림 인챈트 스크롤', '아티팩트 (접미 4랭크)', { atk: 450, crit: 2, bal: 2 }, SRC.throne),
   ];
 }
 

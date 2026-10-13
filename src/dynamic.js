@@ -57,33 +57,34 @@ function spiritActions(items) {
 }
 
 // ───────── 인챈트 ─────────
-// 고정 수치만 계산 (크리티컬 %, 크리티컬 저항 %, 공격속도 등은 계산에서 제외)
+// 인챈트의 '크리티컬 N%'·'밸런스 N%'는 실제로는 크리티컬/밸런스 +N (고정 수치).
+// 크리티컬 저항·공격속도·생명력·스태미나는 입장 조건이 아니라 계산에서 제외.
 const ENCHANTS = {
   prefix: {
-    '비극의': { atk: 700, bal: 4 },
-    '잔혹한': { atk: 430, bal: 2 },
-    '가득한': { atk: 245, def: 200, bal: 6 },
-    '냉철의': { atk: 245, def: 200, bal: 3 },
-    '영원한': { def: 160, bal: -3 },
-    '고결한': { def: 160, bal: -3 },
-    '물드는': { atk: 145, def: 300, bal: 7 },
-    '공허한': { def: 1000 },
+    '비극의': { atk: 700, crit: 8, bal: 4 },
+    '잔혹한': { atk: 430, crit: 4, bal: 2 },
+    '가득한': { atk: 245, def: 200, crit: 3, bal: 6 },
+    '냉철의': { atk: 245, def: 200, crit: 3, bal: 3 },
+    '영원한': { def: 160, crit: 9, bal: -3 },
+    '고결한': { def: 160, crit: 6, bal: -3 },
+    '물드는': { atk: 145, def: 300, crit: 6, bal: 7 },
+    '공허한': { def: 1000, crit: 4 },
     '헤매는': { bal: 12 },
-    '메마른': { bal: 4 },
-    '초월의': { atk: 600, bal: 2, addDmg: 150 },
-    '처단하는': { atk: 700, bal: 2, addDmg: 50 },
-    '고조되는': { atk: 700, bal: 2, addDmg: 50 },
-    '순환의': { atk: 700, bal: 2, addDmg: 50 },
-    '증폭된': { atk: 700, bal: 2, addDmg: 50 },
-    '불굴의': { atk: 700, bal: 2, addDmg: 50 },
+    '메마른': { crit: 6, bal: 4 },
+    '초월의': { atk: 600, crit: 2, bal: 2, addDmg: 150 },
+    '처단하는': { atk: 700, crit: 2, bal: 2, addDmg: 50 },
+    '고조되는': { atk: 700, crit: 2, bal: 2, addDmg: 50 },
+    '순환의': { atk: 700, crit: 2, bal: 2, addDmg: 50 },
+    '증폭된': { atk: 700, crit: 2, bal: 2, addDmg: 50 },
+    '불굴의': { atk: 700, crit: 2, bal: 2, addDmg: 50 },
     '감춰진': { atk: 700 },
-    '질풍의': { atk: 700 },
+    '질풍의': { atk: 700, crit: -4, bal: -4 },
   },
   suffix: {
-    '강림': { atk: 450, bal: 2 },
-    '운명': { atk: 400, bal: 4 },
+    '강림': { atk: 450, crit: 2, bal: 2 },
+    '운명': { atk: 400, crit: 4, bal: 4 },
     '고독': { atk: 465, def: -300, bal: 10 },
-    '시련': { def: 120, bal: -1 },
+    '시련': { def: 120, crit: 12, bal: -1 },
   },
 };
 
@@ -129,7 +130,7 @@ function enchantActions(items) {
         risky: true,
         defaultOff: !known,
         note: known
-          ? '지금 인챈트와의 차이만큼만 계산했어요. 크리티컬·크리티컬 저항의 % 옵션과 성공 확률·실패 시 파괴 위험은 계산에 없습니다.'
+          ? '지금 인챈트와의 차이만큼만 계산했어요. 인챈트 성공 확률과 실패 시 파괴 위험은 계산에 없습니다.'
           : `지금 붙은 '${cur}' 인챈트의 수치를 몰라 새 인챈트 수치를 그대로 더했어요(실제로는 이보다 적게 오름). 그래서 기본으로 꺼 둡니다.`,
         source: SRC_ENCHANT,
       });
