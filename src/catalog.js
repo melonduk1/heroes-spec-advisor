@@ -10,6 +10,8 @@
 // 비용 표기: { gold: 골드, items: { '아이템 이름': 수량 } }
 // 성공률이 1 미만인 단계는 '연속 실패 보너스(천장)'까지 반영한 기대 시도 횟수로 비용을 계산한다.
 
+const { tierActions } = require('./tiers');
+
 const SRC = {
   ep12: 'https://heroes.nexon.com/news/update/View?postno=1181',
   ep13: 'https://heroes.nexon.com/news/update/view?postno=1194',
@@ -91,25 +93,6 @@ function polishActions() {
       requires: '방어력·크리티컬 저항·파괴력 I 연마를 모두 최대로 해야 열림', source: p.src,
     });
   }
-  // 에리우 부츠는 아직 출시 전이라 와드네 부츠 기준
-  a.push(
-    {
-      id: 'polish-wadne-boots-def', type: 'repeat', group: '연마', target: '와드네 부츠',
-      name: '와드네 부츠 연마: 방어력', gain: { def: 10 }, maxSteps: 48,
-      cost: polishBasicArmor, luckyEligible: true, source: SRC.ep12,
-    },
-    {
-      id: 'polish-wadne-boots-dest1', type: 'repeat', group: '연마', target: '와드네 부츠',
-      name: '와드네 부츠 연마: 파괴력 I', gain: { destruction: 14 }, maxSteps: 50,
-      cost: polishDestI_Armor, luckyEligible: false, source: SRC.ep12,
-    },
-    {
-      id: 'polish-wadne-boots-dest2', type: 'repeat', group: '연마', target: '와드네 부츠',
-      name: '와드네 부츠 연마: 파괴력 II', gain: { destruction: 15 }, maxSteps: 88,
-      cost: polishDestII_Armor, luckyEligible: false,
-      requires: '방어력·크리티컬 저항·파괴력 I 연마를 모두 최대로 해야 열림', source: SRC.ep13,
-    },
-  );
   return a;
 }
 
@@ -272,12 +255,16 @@ function enchantActions() {
 }
 
 function buildCatalog() {
+  const eriuWeapon = weaponUpgrade();
+  const eriuArmor = armorUpgrades();
   return [
     ...polishActions(),
     ...accessoryActions(),
-    weaponUpgrade(),
-    ...armorUpgrades(),
+    eriuWeapon,
+    ...eriuArmor,
     ...enchantActions(),
+    // 오르나·와드네 장비 (착용 중일 때만 켜짐)
+    ...tierActions(eriuWeapon, eriuArmor),
   ];
 }
 

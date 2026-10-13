@@ -145,3 +145,53 @@ test('클래스에 따라 공격력/마법 공격력 선택', () => {
   assert.equal(extractStats(raw, '리시타').stats.atk, 81386); // 물리
   assert.equal(extractStats(raw).stats.atk, 82461);           // 모르면 큰 값
 });
+
+test('오르나·와드네 장비: 착용 부위만 켜지고 진행도·경로가 계산된다', () => {
+  const { buildCatalog } = require('../src/catalog');
+  const { parseEquipment } = require('../src/equipment');
+  const { advise, itemsInCatalog } = require('../src/advisor');
+  const catalog = buildCatalog();
+  const raw = JSON.parse(JSON.stringify(require('./fixtures/equipment-sample.json')));
+  const set = (slot, name, tuning) => {
+    const it = raw.item_equipment.find((i) => i.item_equipment_page === 'Bag' && i.item_equipment_slot_name === slot);
+    it.item_name = name;
+    it.item_option.tuning_stat = Object.entries(tuning).map(([stat_name, v]) => ({ stat_name, stat_value: String(v) }));
+  };
+  set('Right Hand', '오르나 소울블레이드', { 공격력: 700, 크리티컬: 8, 밸런스: 2, '공격력 제한 해제': 1000 });
+  set('Head', '고급 와드네 헬름', { 방어력: 479, '공격력 제한 해제': 700 + 150 });
+
+  const eq = parseEquipment(raw, catalog);
+  assert.equal(eq.enable['polish-orna-weapon-atk'], true);
+  assert.equal(eq.enable['polish-weapon-atk'], false); // 에리우 무기 아님
+  assert.equal(eq.enable['path-wadne-weapon'], false);
+  assert.equal(eq.enable['path-wadne-helm'], true);
+  assert.equal(eq.enable['upgrade-helm'], false);
+  assert.equal(eq.progress['polish-orna-weapon-atk'], 50);
+  assert.equal(eq.progress['polish-orna-weapon-crit'], 8);
+  assert.equal(eq.progress['polish-orna-weapon-dest'], 20);
+  assert.equal(eq.progress['path-wadne-helm'], 3);
+  assert.equal(eq.progress['polish-wadne-helm-dest1'], 50);
+  assert.equal(eq.progress['polish-wadne-helm-dest2'], 10);
+
+  // 직접 입력 항목은 거래소 조회 대상이 아니다
+  assert.ok(!itemsInCatalog(catalog).some((n) => n.includes('직접 입력')));
+
+  // 와드네 헬름 경로: 고급→레어 다음 단계는 방어력 +110, 추가피해 +30
+  const helm = catalog.find((a) => a.id === 'path-wadne-helm');
+  assert.deepEqual(helm.steps[3].gain, { def: 110, addDmg: 30 });
+  assert.match(helm.steps[5].label, /에리우 제작/);
+  assert.equal(helm.steps[5].cost.items['루시안의 정수'], 4 + 1);
+
+  const disabled = Object.entries(eq.enable).filter(([, on]) => !on).map(([id]) => id)
+    .concat(catalog.filter((a) => a.defaultOff && !eq.enable[a.id]).map((a) => a.id));
+  const r = advise({
+    stats: { atk: 40000, def: 30000, crit: 300, bal: 160, addDmg: 7000, armorPen: 300, destruction: 10000 },
+    dungeon: { id: 't', name: 't', minStats: { atk: 41000, def: 30500 } },
+    catalog, prices: {}, progress: eq.progress, disabled,
+  });
+  const ids = r.plan.map((p) => p.actionId);
+  assert.ok(ids.includes('polish-orna-weapon-atk'), '오르나 무기 공격력 연마가 계획에 들어간다');
+  assert.ok(!ids.some((id) => id.startsWith('polish-weapon-')), '착용 안 한 에리우 무기는 빠진다');
+  const orna = r.plan.find((p) => p.actionId === 'polish-orna-weapon-atk');
+  assert.ok(orna.missing.some((n) => n.includes('직접 입력')));
+});

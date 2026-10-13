@@ -9,6 +9,7 @@
 //   tuning_stat의 '공격력 제한 해제'는 파괴력 I + II 합계로 온다.
 
 const GRADES = ['일반', '초급', '중급', '고급', '레어', '전설'];
+const { PARTS, seriesOf } = require('./tiers');
 
 // 카탈로그 장비 → 장비 슬롯과 이름 조건
 const ERIU_SLOTS = {
@@ -102,7 +103,8 @@ function parseEquipment(raw, catalog) {
     const related = catalog.filter((a) => a.target === label).map((a) => a.id);
     related.forEach((id) => setE(id, isEriu));
     if (!isEriu) {
-      if (it) notes.push(`${label}이 아니라 '${it.item_name}'을(를) 착용 중이라 ${label} 관련 성장은 계산에서 뺐어요.`);
+      const sr = it && seriesOf(it.item_name);
+      if (it && !sr) notes.push(`${label}이 아니라 '${it.item_name}'을(를) 착용 중이라 ${label} 관련 성장은 계산에서 뺐어요.`);
       continue;
     }
     const t = tuning(it.item_option);
@@ -120,14 +122,32 @@ function parseEquipment(raw, catalog) {
     }
   }
 
-  // ── 와드네 부츠 ──
-  const leg = bySlot.Leg;
-  const wadneBoots = !!leg && leg.item_name.includes('와드네 부츠');
-  catalog.filter((a) => a.target === '와드네 부츠').forEach((a) => setE(a.id, wadneBoots));
-  if (wadneBoots) {
-    const t = tuning(leg.item_option);
-    setP('polish-wadne-boots-def', steps('polish-wadne-boots-def', t['방어력'] || 0, 10));
-    splitDestruction(t['공격력 제한 해제'] ?? t['파괴력'] ?? 0, 'polish-wadne-boots-dest1', 14, 'polish-wadne-boots-dest2', 15);
+  // ── 오르나·와드네 장비: 착용한 부위·시리즈의 연마와 승급 경로만 켠다 ──
+  const tierIds = catalog.filter((a) => a.series === 'orna' || a.series === 'wadne');
+  tierIds.forEach((a) => setE(a.id, false));
+  for (const [key, { slot }] of Object.entries(PARTS)) {
+    const it = bySlot[slot];
+    const sr = it && seriesOf(it.item_name);
+    if (sr !== 'orna' && sr !== 'wadne') continue;
+    tierIds.filter((a) => a.series === sr && a.part === key).forEach((a) => setE(a.id, true));
+    const t = tuning(it.item_option);
+    const id = (stat) => `polish-${sr}-${key}-${stat}`;
+    const per = (stat) => catalog.find((a) => a.id === id(stat))?.per ?? 1;
+    const dest = t['공격력 제한 해제'] ?? t['파괴력'] ?? 0;
+    if (key === 'weapon') {
+      const atk = t['공격력'] ?? t['마법공격력'] ?? t['마법 공격력'] ?? 0;
+      setP(id('atk'), steps(id('atk'), atk, per('atk')));
+      setP(id('bal'), steps(id('bal'), t['밸런스'] || 0, 1));
+      setP(id('crit'), steps(id('crit'), t['크리티컬'] || 0, 1));
+    } else {
+      setP(id('def'), steps(id('def'), t['방어력'] || 0, 10));
+    }
+    if (sr === 'orna') setP(id('dest'), steps(id('dest'), dest, per('dest')));
+    else splitDestruction(dest, id('dest1'), per('dest1'), id('dest2'), per('dest2'));
+    if (sr === 'wadne') setP(`path-wadne-${key}`, gradeOf(it.item_name));
+    const missingPath = sr === 'wadne' && !catalog.some((a) => a.id === `path-wadne-${key}`);
+    notes.push(`${it.item_name}: ${sr === 'orna' ? '오르나' : '와드네'} 기준으로 연마${sr === 'wadne' && !missingPath ? '·승급' : ''}을 계산해요.${
+      sr === 'orna' ? ' 15강 오르나 → 와드네 제작은 아직 계산에 없어요.' : missingPath ? ' 이 부위의 와드네 승급 표는 확인되지 않아 연마만 계산해요.' : ''}`);
   }
 
   // ── 장신구 강화: 착용한 것만 켠다 ──

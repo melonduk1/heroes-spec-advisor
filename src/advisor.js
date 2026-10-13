@@ -1,6 +1,7 @@
 // 부족 스펙 진단 + 가성비 성장 경로 계산
 
 const { STAT_KEYS } = require('./stats');
+const { isManualItem } = require('./tiers');
 
 // ── 기대 시도 횟수 (연속 실패 보너스/천장 반영) ──
 // rate: 기본 성공률, pity[k]: (k+1)번 연속 실패 후 다음 시도에 더해지는 보너스
@@ -135,7 +136,7 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
       list.push({
         actionId: a.id, name: a.name, group: a.group, stepLabel: e.step.label,
         gain: e.step.gain[k], costPerPoint: e.cost / e.step.gain[k], partial: e.missing.length > 0,
-        missing: e.missing, attempts: e.attempts, risky: !!a.risky, requires: a.requires || null,
+        missing: e.missing, attempts: e.attempts, risky: !!a.risky, estimated: !!(a.estimated || e.step.estimated), requires: a.requires || null,
         losses: Object.entries(e.step.gain).filter(([, g]) => g < 0).map(([stat, g]) => ({ stat, g })),
         blockedByLoss: e.value === -Infinity,
       });
@@ -179,7 +180,7 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
       if (remaining[k] !== undefined) remaining[k] = Math.max(0, remaining[k] - g);
       else if (surplus[k] !== undefined) surplus[k] += g;
     }
-    steps.push({ actionId: a.id, name: a.name, group: a.group, target: a.target, stepLabel: e.step.label, gain: e.step.gain, cost: e.cost, attempts: e.attempts, eff, missing: e.missing, breakdown: e.breakdown, risky: !!a.risky, requires: a.requires || null, source: a.source });
+    steps.push({ actionId: a.id, name: a.name, group: a.group, target: a.target, stepLabel: e.step.label, gain: e.step.gain, cost: e.cost, attempts: e.attempts, eff, missing: e.missing, breakdown: e.breakdown, risky: !!a.risky, estimated: !!(a.estimated || e.step.estimated), requires: a.requires || null, source: a.source });
     state[a.id] += 1;
   }
 
@@ -192,6 +193,7 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
       last.count += 1;
       last.cost += s.cost;
       last.toLabel = s.stepLabel;
+      last.estimated = last.estimated || s.estimated;
       for (const m of s.missing) if (!last.missing.includes(m)) last.missing.push(m);
       for (const [k, v] of Object.entries(s.gain)) last.gain[k] = (last.gain[k] || 0) + v;
       for (const b of s.breakdown) {
@@ -206,7 +208,7 @@ function advise({ stats, dungeon, catalog, prices = {}, progress = {}, disabled 
       const row = {
         actionId: s.actionId, name: s.name, group: s.group, target: s.target,
         fromLabel: s.stepLabel, toLabel: s.stepLabel, count: 1, cost: s.cost,
-        gain: { ...s.gain }, materials, risky: s.risky, requires: s.requires, source: s.source,
+        gain: { ...s.gain }, materials, risky: s.risky, estimated: s.estimated, requires: s.requires, source: s.source,
         missing: [...s.missing],
         avgEff: 0,
         goldDirect: (s.cost / s.attempts - s.breakdown.reduce((t, b) => t + (b.unit || 0) * b.qty, 0)) * s.attempts,
@@ -263,7 +265,8 @@ function itemsInCatalog(catalog) {
     if (a.cost) add(a.cost);
     if (a.steps) a.steps.forEach((s) => add(s.cost));
   }
-  return [...set].sort();
+  // '직접 입력' 항목은 거래소에 없으니 시세 조회 대상에서 뺀다
+  return [...set].filter((n) => !isManualItem(n)).sort();
 }
 
 module.exports = { advise, diagnose, expectedAttempts, itemsInCatalog, STAT_KEYS };

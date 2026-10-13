@@ -208,12 +208,19 @@ function renderLadder() {
 // ───────────── 장비 진행 상황 ─────────────
 function renderGear() {
   const groups = {};
-  for (const a of S.catalog) (groups[a.group] ||= []).push(a);
+  const tiers = [];
+  for (const a of S.catalog) (a.series ? tiers : (groups[a.group] ||= [])).push(a);
   const box = $('#gearList');
+  // 오르나·와드네 장비는 착용한 사람만 쓰니 접어 두고, 켜진 게 있으면 펼친다
+  const tierOn = tiers.some((a) => !S.disabled.includes(a.id));
   box.innerHTML = Object.entries(groups).map(([g, items]) => `
     <div class="gear-group"><h3>${esc(g)}${g === '장신구 강화' ? ' (반지는 2개만 체크)' : ''}</h3>
       ${items.map((a) => gearRow(a)).join('')}
-    </div>`).join('');
+    </div>`).join('') + (tiers.length ? `
+    <details class="gear-group" ${tierOn ? 'open' : ''}><summary><h3 style="display:inline">오르나·와드네 장비</h3></summary>
+      <p class="hint small">캐릭터를 불러오면 착용한 부위만 자동으로 켜져요. 와드네 승급은 전설까지 올린 뒤 에리우 제작으로 이어서 계산합니다.</p>
+      ${tiers.map((a) => gearRow(a)).join('')}
+    </details>` : '');
   box.querySelectorAll('[data-toggle]').forEach((cb) => cb.addEventListener('change', () => {
     const id = cb.dataset.toggle;
     S.disabled = cb.checked ? S.disabled.filter((x) => x !== id) : [...S.disabled, id];
@@ -386,7 +393,7 @@ function renderResult(r, d) {
       <td><span class="aname">${esc(x.name)}</span></td>
       <td colspan="3" class="muted">${x.status === 'maxed' ? '이미 끝까지 했어요' : '계산에서 꺼져 있어요 (착용하지 않은 장비이거나 기본으로 꺼 둔 인챈트). 왼쪽 "장비 진행 상황"에서 켤 수 있어요.'}</td>
     </tr>` : `<tr>
-      <td><span class="aname">${esc(x.name)}</span>${x.risky ? ' <span class="tag risk">확률 미반영</span>' : ''}${x.requires ? `<div class="muted">${esc(x.requires)}</div>` : ''}</td>
+      <td><span class="aname">${esc(x.name)}</span>${x.risky ? ' <span class="tag risk">확률 미반영</span>' : ''}${x.estimated ? ' <span class="tag risk">수치 추정</span>' : ''}${x.requires ? `<div class="muted">${esc(x.requires)}</div>` : ''}</td>
       <td>${esc(x.stepLabel)}${x.attempts > 1.001 ? `<div class="muted">기대 ${x.attempts.toFixed(2)}회 시도</div>` : ''}</td>
       <td class="num">+${fmt(x.gain)}${x.losses?.length ? `<div class="muted">${esc(x.losses.map((l) => `${S.meta.statLabels[l.stat].replace(/\(.*\)/, '')} −${fmt(-l.g)}`).join(', '))} 함께 감소</div>` : ''}${x.blockedByLoss ? '<div class="muted">줄어드는 스탯이 이미 부족하거나 요구치 아래로 떨어져서 추천에서 제외</div>' : ''}</td>
       <td class="num"><span class="gold">${fmtGold(x.costPerPoint)}</span>${x.partial ? `<div class="muted">+ 시세 없는 재료 ${x.missing.length}종</div>` : ''}</td>
@@ -432,7 +439,7 @@ function planRow(p, i) {
     `<li>${esc(n)} ${m.qty % 1 ? m.qty.toFixed(1) : fmt(m.qty)}개 × ${m.unit == null ? '?' : fmt(m.unit)}</li>`).join('');
   return `<tr>
     <td class="num">${i + 1}</td>
-    <td><span class="tag">${esc(p.group)}</span>${p.risky ? '<span class="tag risk">확률 미반영</span>' : ''}${p.missing?.length ? '<span class="tag risk">시세 일부 없음</span>' : ''}<span class="aname">${esc(p.name)}</span>
+    <td><span class="tag">${esc(p.group)}</span>${p.risky ? '<span class="tag risk">확률 미반영</span>' : ''}${p.missing?.length ? '<span class="tag risk">시세 일부 없음</span>' : ''}${p.estimated ? '<span class="tag risk">수치 추정</span>' : ''}<span class="aname">${esc(p.name)}</span>
       <div class="muted">${esc(range)}</div>
       ${p.requires ? `<div class="muted">${esc(p.requires)}</div>` : ''}
       <details><summary>재료 보기</summary><ul class="mats"><li>골드 ${fmt(p.goldDirect)}</li>${mats}</ul>
@@ -452,6 +459,16 @@ function planRow(p, i) {
     S.baseCatalog = catalog;
     S.catalog = [...catalog, ...S.dynamic];
     S.disabled = store.get('hs.disabled', catalog.filter((a) => a.defaultOff).map((a) => a.id));
+    // 새로 추가된 방법 중 기본으로 꺼 둘 것(오르나·와드네 등)은 예전에 저장한 설정에도 꺼진 채로 넣는다
+    const known = store.get('hs.knownIds', null);
+    const hadSaved = store.get('hs.disabled', null) !== null;
+    if (hadSaved) {
+      // knownIds가 없던 예전 저장값이면 오르나·와드네 항목을 새것으로 본다
+      const seen = new Set(known || catalog.filter((a) => !a.series).map((a) => a.id));
+      for (const a of catalog) if (!seen.has(a.id) && a.defaultOff && !S.disabled.includes(a.id)) S.disabled.push(a.id);
+      store.set('hs.disabled', S.disabled);
+    }
+    store.set('hs.knownIds', catalog.map((a) => a.id));
     $('#mockBanner').hidden = !meta.mock;
     $('#dataDate').textContent = meta.dungeonsUpdated;
     $('#lucky').value = S.lucky;
