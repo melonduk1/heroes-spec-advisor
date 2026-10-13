@@ -418,7 +418,14 @@
         "시공간 왜곡 전체 주간 3회 공유"
       ],
       "source": "https://heroes.nexon.com/news/update/view?postno=1074",
-      "caps": null
+      "caps": {
+        "atk": 64850,
+        "crit": 304,
+        "bal": 159,
+        "critResist": 317,
+        "source": "https://www.mhon.kr/raid",
+        "checked": "2026-10-13"
+      }
     }
   ]
 }
