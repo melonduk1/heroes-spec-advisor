@@ -13,7 +13,7 @@ const cfg = {
   pathBasic: process.env.NEXON_PATH_BASIC || '/character/basic',
   pathStat: process.env.NEXON_PATH_STAT || '/character/stat',
   pathEquip: process.env.NEXON_PATH_EQUIP || '/character/item-equipment',
-  pathAuction: process.env.NEXON_PATH_AUCTION || '/auction/history',
+  pathAuction: process.env.NEXON_PATH_AUCTION || '/marketplace/market-history',
   auctionItemParam: process.env.NEXON_AUCTION_ITEM_PARAM || 'item_name',
   mock: process.env.MOCK === '1' || !process.env.NEXON_API_KEY,
 };
@@ -136,11 +136,12 @@ async function getPrices(names) {
 }
 
 // 거래소 원본 응답 — 스키마 확인용
-async function getAuctionRaw(itemName) {
+async function getAuctionRaw(itemName, paramName) {
   if (cfg.mock) return { mock: true, note: '목업 모드에서는 거래소를 조회하지 않습니다.' };
-  const out = { path: cfg.pathAuction, param: cfg.auctionItemParam, item: itemName };
+  const param = paramName || cfg.auctionItemParam;
+  const out = { path: cfg.pathAuction, param, item: itemName };
   try {
-    out.response = await call(cfg.pathAuction, { [cfg.auctionItemParam]: itemName });
+    out.response = await call(cfg.pathAuction, itemName ? { [param]: itemName } : {});
     out.parsedUnitPrices = unitPricesFrom(out.response).slice(0, 20);
   } catch (e) { out.error = e.message; out.status = e.status; out.body = e.body; }
   return out;

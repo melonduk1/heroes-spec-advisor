@@ -64,8 +64,10 @@ app.get('/api/debug/equipment', handle(async (req, res) => {
 
 // 거래소 원본 응답 확인용
 app.get('/api/debug/auction', handle(async (req, res) => {
-  const item = String(req.query.item || '고급 강화의 비약').trim();
-  res.json(await nexon.getAuctionRaw(item));
+  // ?item=아이템명&param=파라미터이름 (param 생략 시 설정값, item= 비우면 파라미터 없이 호출)
+  const item = req.query.item === undefined ? '고급 강화의 비약' : String(req.query.item).trim();
+  const param = req.query.param ? String(req.query.param).replace(/[^a-z_]/g, '') : undefined;
+  res.json(await nexon.getAuctionRaw(item, param));
 }));
 
 app.get('/api/prices', handle(async (req, res) => {
