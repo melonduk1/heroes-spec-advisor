@@ -65,6 +65,8 @@ function extractStats(raw, className) {
   }
   // 입장 조건의 '공격력(마법 공격력)'은 캐릭터가 쓰는 쪽으로 본다. 캐릭터를 모르면 큰 값.
   const type = attackType(className);
+  // 비교 화면용: 공격력·마법 공격력 원래 값
+  const attack = { atk: found.atk ?? null, matk: found.matk ?? null };
   if (type === 'magic' && found.matk !== undefined) found.atk = found.matk;
   else if (type === null && found.matk !== undefined) found.atk = Math.max(found.atk ?? 0, found.matk);
   delete found.matk;
@@ -74,7 +76,7 @@ function extractStats(raw, className) {
     if (found[k] === undefined) missing.push(k);
     else stats[k] = found[k];
   }
-  return { stats, missing };
+  return { stats, missing, attack };
 }
 
 module.exports = { attackType, MAGIC_CLASSES, extractStats, STAT_KEYS, STAT_ALIASES };

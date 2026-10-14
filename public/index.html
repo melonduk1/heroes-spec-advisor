@@ -14,11 +14,15 @@
     <div class="top-inner">
       <h1>마영전 스펙 진단기</h1>
       <p class="lede">가고 싶은 던전까지 무엇이 얼마나 모자란지, 그리고 가장 적은 골드로 채우는 순서를 계산합니다.</p>
+      <nav class="tabs-top" role="tablist" aria-label="화면">
+        <button role="tab" data-view="advisor" aria-selected="true">스펙 진단</button>
+        <button role="tab" data-view="compare" aria-selected="false">캐릭터 비교</button>
+      </nav>
       <p id="mockBanner" class="banner" hidden>목업 모드로 실행 중입니다. 캐릭터 스탯과 거래소 가격은 예시 값이에요. <code>.env</code>에 <code>NEXON_API_KEY</code>를 넣으면 실제 데이터로 바뀝니다.</p>
     </div>
   </header>
 
-  <main class="layout">
+  <main class="layout" id="viewAdvisor">
     <aside class="side">
       <section class="panel" aria-labelledby="h-char">
         <h2 id="h-char">내 캐릭터</h2>
@@ -96,6 +100,35 @@
     </div>
   </main>
 
+  <main class="compare-view" id="viewCompare" hidden>
+    <section class="panel">
+      <h2>두 캐릭터 스펙 비교</h2>
+      <form id="compareForm" class="compare-form">
+        <label>캐릭터 A<input id="cmpA" placeholder="캐릭터 이름" autocomplete="off" required></label>
+        <span class="vs" aria-hidden="true">vs</span>
+        <label>캐릭터 B<input id="cmpB" placeholder="캐릭터 이름" autocomplete="off" required></label>
+        <button type="submit">비교하기</button>
+      </form>
+      <p id="cmpMsg" class="msg" role="status"></p>
+    </section>
+    <div id="cmpResult" hidden>
+      <div id="cmpHeads" class="cmp-heads"></div>
+      <section>
+        <div class="sec-head"><h2>스탯</h2><p class="sub">초록색이 더 높은 쪽이에요. 차이는 B − A.</p></div>
+        <div class="table-wrap"><table id="cmpStats" class="plan cmp"></table></div>
+      </section>
+      <section>
+        <div class="sec-head"><h2>던전 입장과 상한</h2><p class="sub">입장 조건을 채웠는지, 던전 상한(공상·만크·만밸)까지 얼마나 남았는지 나란히 봅니다.</p></div>
+        <div class="table-wrap"><table id="cmpDungeons" class="plan cmp"></table></div>
+      </section>
+      <section>
+        <div class="sec-head"><h2>장비</h2><p class="sub">같은 부위끼리 나란히. 강화, 인챈트(접두·접미), 정령 합성, 연마 수치까지.</p></div>
+        <div class="table-wrap"><table id="cmpEquip" class="plan cmp"></table></div>
+      </section>
+    </div>
+  </main>
+
   <script src="app.js"></script>
+  <script src="compare.js"></script>
 </body>
 </html>

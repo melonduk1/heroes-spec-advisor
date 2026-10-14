@@ -59,7 +59,7 @@ app.get('/api/character', handle(async (req, res) => {
   if (!name) return res.status(400).json({ error: '캐릭터 이름을 입력하세요.' });
   const ch = await nexon.getCharacter(name);
   const className = ch.basic?.character_class_name || null;
-  const { stats, missing } = extractStats(ch.stat, className);
+  const { stats, missing, attack } = extractStats(ch.stat, className);
   res.json({
     name: ch.basic?.character_name || name,
     basic: ch.basic,
@@ -67,6 +67,7 @@ app.get('/api/character', handle(async (req, res) => {
     attackType: attackType(className),
     stats,
     missing,
+    attack,
     mock: ch.mock,
     equipment: (() => {
       if (!ch.equipment) return null;
