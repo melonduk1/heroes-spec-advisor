@@ -68,6 +68,7 @@ function renderCompare(A, B) {
     <span class="cname">${esc(r.name)}</span>
     ${r.className ? `<span class="cclass">${esc(r.className)}</span>` : ''}
     ${r.basic?.character_level ? `<span class="clv">${esc(r.basic.character_level)}레벨</span>` : ''}
+    ${r.basic?.cairde_name ? `<span class="clv">카르제 ${esc(r.basic.cairde_name)}</span>` : ''}
     ${r.attackType ? `<span class="ctype">${r.attackType === 'magic' ? '마법 공격력' : '물리 공격력'} 캐릭터</span>` : ''}
   </div>`;
   $('#cmpHeads').innerHTML = head(A, 'A') + head(B, 'B');

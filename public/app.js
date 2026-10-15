@@ -156,10 +156,10 @@ function renderCharBadge(r) {
   if (!box) return;
   const type = r.attackType === 'magic' ? '마법 공격력 캐릭터' : r.attackType === 'physical' ? '물리 공격력 캐릭터' : '';
   box.innerHTML = r.className
-    ? `<span class="cname">${esc(r.name)}</span><span class="cclass">${esc(r.className)}</span>${r.basic?.character_level ? `<span class="clv">${esc(r.basic.character_level)}레벨</span>` : ''}${type ? `<span class="ctype">${type}</span>` : ''}`
+    ? `<span class="cname">${esc(r.name)}</span><span class="cclass">${esc(r.className)}</span>${r.basic?.character_level ? `<span class="clv">${esc(r.basic.character_level)}레벨</span>` : ''}${type ? `<span class="ctype">${type}</span>` : ''}${r.basic?.cairde_name ? `<span class="clv">카르제 ${esc(r.basic.cairde_name)}</span>` : ''}`
     : '';
   box.hidden = !r.className;
-  store.set('hs.badge', { name: r.name, className: r.className, attackType: r.attackType, basic: { character_level: r.basic?.character_level } });
+  store.set('hs.badge', { name: r.name, className: r.className, attackType: r.attackType, basic: { character_level: r.basic?.character_level, cairde_name: r.basic?.cairde_name } });
 }
 
 // ───────────── 던전 사다리 ─────────────
