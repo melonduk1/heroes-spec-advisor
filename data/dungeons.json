@@ -15,6 +15,42 @@
   },
   "dungeons": [
     {
+      "id": "ancient-temple-ruins",
+      "name": "고대 신전 폐허",
+      "boss": "모르페서",
+      "category": "에리우 레이드",
+      "episode": "시즌4 에피소드 16",
+      "level": 125,
+      "party": 4,
+      "released": "2026-10-15",
+      "minStats": {
+        "atk": 69120,
+        "def": 41750,
+        "crit": 371,
+        "bal": 214,
+        "addDmg": 9100,
+        "armorPen": 410
+      },
+      "boss_stats": {
+        "level": 125,
+        "balResist": 123,
+        "critResist": 345,
+        "crit": 450
+      },
+      "resist": {
+        "crit": 345,
+        "bal": 123
+      },
+      "caps": null,
+      "notes": [
+        "잊혀진 땅 지역, 하루 1회 전투 성공 제한, 출정 시 피로도 16%",
+        "보스에게 추가피해 상한이 없음",
+        "수치는 10/7 테스트 서버 패치노트 기준이라 정식 서버에서 바뀔 수 있음",
+        "만크·만밸은 보스 저항으로 계산(크저 345+50, 밸저 123+100). 공상은 아직 모름"
+      ],
+      "source": "https://heroes.nexon.com/news/update/View?page=1&postno=1252"
+    },
+    {
       "id": "golden-tree-hill",
       "name": "황금 나무 언덕",
       "boss": "에스라스",
