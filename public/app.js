@@ -90,6 +90,7 @@ $('#lookupForm').addEventListener('submit', async (e) => {
     S.attackType = r.attackType;
     store.set('hs.attackType', S.attackType);
     renderCharBadge(r);
+    if (window.renderCharSheet) { window.renderCharSheet(r); $('#charQ').value = r.name; }
     msg.textContent = r.missing.length
       ? `${r.name}${lv ? ` (${lv})` : ''} 불러옴. 응답에 없던 스탯(${r.missing.map((k) => S.meta.statLabels[k]).join(', ')})은 직접 입력해 주세요.`
       : `${r.name}${lv ? ` (${lv})` : ''} 스탯을 불러왔어요.`;

@@ -68,6 +68,10 @@ app.get('/api/character', handle(async (req, res) => {
     stats,
     missing,
     attack,
+    // 캐릭터 화면용 전체 능력치 [{name, value}] (힘·민첩·크리티컬 저항 등 포함)
+    statList: (Array.isArray(ch.stat?.stat) ? ch.stat.stat : [])
+      .map((x) => ({ name: x.stat_name, value: Number(String(x.stat_value).replace(/,/g, '')) }))
+      .filter((x) => x.name && Number.isFinite(x.value)),
     mock: ch.mock,
     equipment: (() => {
       if (!ch.equipment) return null;

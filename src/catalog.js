@@ -19,6 +19,7 @@ const SRC = {
   ep15: 'https://heroes.nexon.com/news/update/View?postno=1235',
   ep11: 'https://heroes.nexon.com/news/update/View?postno=1170',
   throne: 'https://heroes.nexon.com/news/update/View?postno=1199',
+  ep16: 'https://m.heroes.nexon.com/news/update/View?page=1&postno=1254',
 };
 
 const INJ = (n) => ({
@@ -39,6 +40,7 @@ const ERIU_ARMOR = [
   { slot: 'gauntlet', label: '에리우 건틀릿', defMax: 479, d1Max: 700, d2Max: 2640, src: SRC.ep15 },
   { slot: 'greaves', label: '에리우 그리브즈', defMax: 567, d1Max: 1050, d2Max: 4440, src: SRC.ep13 },
   { slot: 'mail', label: '에리우 메일', defMax: 596, d1Max: 1050, d2Max: 4440, src: SRC.ep14 },
+  { slot: 'boots', label: '에리우 부츠', defMax: 479, d1Max: 700, d2Max: 2640, src: SRC.ep16 },
 ];
 
 function polishActions() {
@@ -151,6 +153,7 @@ function accessoryActions() {
     { key: 'ring-mortal', label: '필멸의 굴레(반지)', slot: 'ring', src: SRC.ep15 },
     { key: 'earring-plenty', label: '풍요의 근본(귀걸이)', slot: 'earring', src: SRC.ep13 },
     { key: 'belt-starlight', label: '스타라이트 벨트', slot: 'belt', src: SRC.ep14 },
+    { key: 'ring-dominion', label: '지배의 굴레(반지)', slot: 'ring', src: SRC.ep16 },
   ].map((x) => ({
     id: `enhance-${x.key}`, type: 'sequence', group: '장신구 강화', target: x.label, slot: x.slot,
     defaultOff: x.slot === 'ring',
@@ -176,19 +179,21 @@ function accessoryActions() {
 const GRADES = ['일반', '초급', '중급', '고급', '레어', '전설'];
 
 function weaponUpgrade() {
-  // 단계별 상승: 공격력 +1250, 크리티컬 +1, 밸런스 +1, 추가피해 +150
+  // 단계별 상승: 일반 38,400 → 중급 39,900(공식) → 고급·레어 +1,250씩 → 전설 44,150(공식)
   const g = { atk: 1250, crit: 1, bal: 1, addDmg: 150 };
+  const g0 = { atk: 750, crit: 1, bal: 1, addDmg: 150 };
   const steps = [
-    { label: '일반→초급', gain: g, rate: 1, cost: { gold: 1500000, items: { '에리우 승급석: 무기': 1, '루시안의 정수': 1, '에리우의 파편: 무기': 1, '예리한 에리우의 결정': 10, '프리미엄 강화의 룬': 2, '타리안 강철': 15 } }, source: SRC.ep12 },
-    { label: '초급→중급', gain: g, rate: 1, cost: { gold: 2250000, items: { '에리우 승급석: 무기': 2, '세미아스의 정수': 2, '에리우의 파편: 무기': 2, '예리한 에리우의 결정': 10, '가벼운 에리우의 결정': 10, '프리미엄 강화의 룬': 2, '고급 강화의 비약': 10, '타리안 강철': 33 } }, source: SRC.ep13 },
+    { label: '일반→초급', gain: g0, rate: 1, cost: { gold: 1500000, items: { '에리우 승급석: 무기': 1, '루시안의 정수': 1, '에리우의 파편: 무기': 1, '예리한 에리우의 결정': 10, '프리미엄 강화의 룬': 2, '타리안 강철': 15 } }, source: SRC.ep12 },
+    { label: '초급→중급', gain: g0, rate: 1, cost: { gold: 2250000, items: { '에리우 승급석: 무기': 2, '세미아스의 정수': 2, '에리우의 파편: 무기': 2, '예리한 에리우의 결정': 10, '가벼운 에리우의 결정': 10, '프리미엄 강화의 룬': 2, '고급 강화의 비약': 10, '타리안 강철': 33 } }, source: SRC.ep13 },
     { label: '중급→고급', gain: g, rate: 1, cost: { gold: 3375000, items: { '에리우 승급석: 무기': 3, '우스키아스의 정수': 3, '에리우의 파편: 무기': 3, '예리한 에리우의 결정': 10, '가벼운 에리우의 결정': 10, '안정된 에리우의 결정': 10, '+ 프리미엄 강화의 룬': 1, '고급 강화의 비약': 25, '타리안 강철': 72 } }, source: SRC.ep14 },
     { label: '고급→레어', gain: g, rate: 1, cost: { gold: 5100000, items: { '에리우 승급석: 무기': 3, '에스라스의 정수': 3, '에리우의 파편: 무기': 3, '가벼운 에리우의 결정': 10, '안정된 에리우의 결정': 10, '오롯한 에리우의 결정': 10, '+ 프리미엄 강화의 룬': 1, '고급 강화의 비약': 40, '타리안 강철': 159 } }, source: SRC.ep15 },
+    { label: '레어→전설', gain: { atk: 1750, crit: 2, bal: 2, addDmg: 150 }, rate: 1, cost: { gold: 7500000, items: { '에리우 승급석: 무기': 4, '모르페서의 정수': 3, '에리우의 파편: 무기': 4, '예리한 에리우의 결정': 10, '가벼운 에리우의 결정': 10, '안정된 에리우의 결정': 10, '오롯한 에리우의 결정': 10, '벼려진 에리우의 결정': 10, '프리미엄 강화의 룬': 1, '고급 강화의 비약': 60, '타리안 강철': 351 } }, source: SRC.ep16 },
   ];
   return {
     id: 'upgrade-eriu-weapon', type: 'sequence', group: '승급', target: '에리우 무기',
-    name: '에리우 무기 승급', steps, gradeNames: GRADES.slice(0, 5),
-    note: '전설 등급은 아직 미출시. 승급은 100% 성공.',
-    source: SRC.ep15,
+    name: '에리우 무기 승급', steps, gradeNames: GRADES,
+    note: '승급은 100% 성공. 전설 수치(공격력 44,150, 크리 142, 밸런스 81, 추가피해 5,000)는 10/15 패치노트 기준.',
+    source: SRC.ep16,
   };
 }
 
@@ -205,6 +210,7 @@ const ARMOR_UPG = [
   { slot: 'greaves', label: '에리우 그리브즈', part: '다리 방어구', essence: '세미아스의 정수', crystal: '매끈한 에리우의 결정', def: [4843, 5093, 5343, 5643, 5943, 6243], cr: [57, 58, 59, 61, 63, 66], src: SRC.ep13 },
   { slot: 'mail', label: '에리우 메일', part: '가슴 방어구', essence: '우스키아스의 정수', crystal: '견고한 에리우의 결정', def: [5058, 5339, 5620, 5914, 6208, 6502], cr: [49, 50, 51, 53, 55, 57], src: SRC.ep14 },
   { slot: 'gauntlet', label: '에리우 건틀릿', part: '손 방어구', essence: '에스라스의 정수', crystal: '굳건한 에리우의 결정', def: [4888, 5118, 5348, 5578, 5808, 6158], cr: [36, 37, 38, 39, 40, 41], src: SRC.ep15 },
+  { slot: 'boots', label: '에리우 부츠', part: '발 방어구', essence: '모르페서의 정수', crystal: '완강한 에리우의 결정', def: [4888, 5118, 5348, 5578, 5808, 6158], cr: [36, 37, 38, 39, 40, 41], src: SRC.ep16 },
 ];
 
 function armorUpgrades() {

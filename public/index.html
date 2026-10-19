@@ -15,6 +15,7 @@
       <h1>마영전 스펙 진단기</h1>
       <p class="lede">가고 싶은 던전까지 무엇이 얼마나 모자란지, 그리고 가장 적은 골드로 채우는 순서를 계산합니다.</p>
       <nav class="tabs-top" role="tablist" aria-label="화면">
+        <button role="tab" data-view="char" aria-selected="false">캐릭터 정보</button>
         <button role="tab" data-view="advisor" aria-selected="true">스펙 진단</button>
         <button role="tab" data-view="compare" aria-selected="false">캐릭터 비교</button>
       </nav>
@@ -100,6 +101,16 @@
     </div>
   </main>
 
+  <main class="char-view" id="viewChar" hidden>
+    <form id="charForm" class="char-search" role="search">
+      <label for="charQ" class="sr">캐릭터 이름</label>
+      <input id="charQ" placeholder="캐릭터 이름으로 검색" autocomplete="off" required>
+      <button type="submit">검색</button>
+    </form>
+    <p id="charMsg" class="msg" role="status"></p>
+    <div id="charSheet" class="char-sheet" hidden></div>
+  </main>
+
   <main class="compare-view" id="viewCompare" hidden>
     <section class="panel">
       <h2>두 캐릭터 스펙 비교</h2>
@@ -130,5 +141,6 @@
 
   <script src="app.js"></script>
   <script src="compare.js"></script>
+  <script src="character.js"></script>
 </body>
 </html>

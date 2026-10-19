@@ -157,6 +157,7 @@ function wadneArmorSteps(key) {
 const ERIU_ARMOR_CRAFT = {
   helm: { part: '머리 방어구', crystal: '단단한 에리우의 결정', essence: '루시안의 정수' },
   gauntlet: { part: '손 방어구', crystal: '굳건한 에리우의 결정', essence: '에스라스의 정수' },
+  boots: { part: '발 방어구', crystal: '완강한 에리우의 결정', essence: '모르페서의 정수' },
 };
 
 function addCost(a, b) {

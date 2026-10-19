@@ -18,6 +18,7 @@ const ERIU_SLOTS = {
   mail: { slot: 'Upper', label: '에리우 메일' },
   greaves: { slot: 'Lower', label: '에리우 그리브즈' },
   gauntlet: { slot: 'Hand', label: '에리우 건틀릿' },
+  boots: { slot: 'Leg', label: '에리우 부츠' },
 };
 
 const ACCESSORIES = {
@@ -26,6 +27,7 @@ const ACCESSORIES = {
   'enhance-ring-calm': '고요의 증표',
   'enhance-earring-plenty': '풍요의 근본',
   'enhance-belt-starlight': '스타라이트 벨트',
+  'enhance-ring-dominion': '지배의 굴레',
 };
 
 // 카탈로그 인챈트 → 장비에 붙는 이름 (접두는 '~의/~한', 접미는 명사)

@@ -1,16 +1,16 @@
 // 캐릭터 비교 탭 — app.js 의 $, fmt, esc, store, api, S, SHORT_STAT 를 함께 쓴다
 
 // ───────────── 탭 전환 (#compare 로 바로 열 수 있게) ─────────────
+const VIEWS = { advisor: '#viewAdvisor', char: '#viewChar', compare: '#viewCompare' };
 function showView(view) {
-  const isCmp = view === 'compare';
-  $('#viewAdvisor').hidden = isCmp;
-  $('#viewCompare').hidden = !isCmp;
+  if (!VIEWS[view]) view = 'advisor';
+  for (const [k, sel] of Object.entries(VIEWS)) $(sel).hidden = k !== view;
   document.querySelectorAll('.tabs-top [data-view]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.view === view)));
-  const hash = isCmp ? '#compare' : '';
+  const hash = view === 'advisor' ? '' : `#${view}`;
   if (location.hash !== hash) history.replaceState(null, '', hash || location.pathname);
 }
 document.querySelectorAll('.tabs-top [data-view]').forEach((b) => b.addEventListener('click', () => showView(b.dataset.view)));
-showView(location.hash === '#compare' ? 'compare' : 'advisor');
+showView(location.hash.slice(1) || 'advisor');
 
 // ───────────── 비교 ─────────────
 const CMP_SLOTS = [
